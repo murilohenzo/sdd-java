@@ -1,0 +1,218 @@
+# Perfil local — Pet Adoption System
+
+Este arquivo contém fatos e decisões exclusivos deste repositório. Ele complementa o `AGENTS.md` genérico e não deve ser copiado para outro projeto sem nova análise. As informações foram verificadas na estrutura atual, nos `pom.xml` e nos arquivos de configuração. Quando houver diferença entre documentação e código, priorize o código e atualize este perfil.
+
+## Regras arquiteturais
+
+- Decisões arquiteturais: [`architecture.md`](../rules/architecture.md) e [`hexagonal.md`](../rules/architectures/hexagonal.md).
+- Skill para criar ou revisar regras ArchUnit: [`archunit-rules`](../skills/archunit-rules/SKILL.md).
+- Skill para gerar e atualizar o blueprint arquitetural: [`architecture-blueprint-generator`](../skills/architecture-blueprint-generator/SKILL.md).
+- Skill para analisar contexto, releases de melhoria e comunicação macro: [`project-context-analyzer`](../skills/project-context-analyzer/SKILL.md).
+
+## Aplicações e responsabilidades
+
+### `gateway/`
+
+- Papel: entrada única da aplicação; roteia `/users/**` para o serviço de usuários e `/pets/**` para o serviço de pets. Também integra OAuth2/OIDC, faz validação de JWT, relay de token, rate limiting distribuído, CORS e tratamento global de erros.
+- Tecnologia: Java 21, Spring Boot herdado pelo chassi 3.3.2, Spring Cloud Gateway 2023.0.2, Spring WebFlux, Spring Security OAuth2, Redis reativo, Actuator e Lombok.
+- Perfil `local`: aplicação na porta `8081`; Actuator na porta `9090`.
+- Perfil `des`: aplicação na porta `8085`; Actuator na porta `9095`.
+- Rotas configuradas no perfil `local`: usuários em `http://localhost:3000`, pets em `http://localhost:3005` e `/get` para `httpbin.org`.
+- Rate limit: no perfil `local`, as rotas são limitadas por origem porque OAuth2 está desativado; no perfil `des`, as rotas autenticadas combinam origem e identidade JWT. Redis usa `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DATABASE`, `REDIS_CONNECT_TIMEOUT`, `REDIS_COMMAND_TIMEOUT` e `REDIS_SSL_ENABLED`. Configure `RATE_LIMIT_TRUSTED_PROXY_COUNT` somente conforme a topologia real de proxies.
+- Arquivos principais: `gateway/src/main/resources/application.yaml` e `gateway/src/main/resources/application-des.yaml`.
+
+### `ms-user/`
+
+- Papel: cadastro, consulta, atualização e remoção de usuários; persistência JPA; publicação de eventos de domínio via RabbitMQ e Outbox; proteção da API com OAuth2 Resource Server.
+- Tecnologia: Java 21, Spring Boot 3.2.0, Spring MVC, Spring Data JPA, MySQL/H2, Spring AMQP/RabbitMQ, Spring Security OAuth2, OpenAPI Generator, Springdoc, MapStruct e Lombok.
+- Perfil padrão/sem perfil explícito: aplicação na porta `8080`; Actuator na porta `9090`.
+- Perfil `local`: aplicação na porta `3000`; Actuator na porta `9091`; autenticação desabilitada para desenvolvimento e dependências apontando para localhost.
+- Perfil `des`: aplicação na porta `3000`; Actuator na porta `9095`; autenticação habilitada e `KEYCLOAK_URI`/credenciais de banco devem ser fornecidos por ambiente.
+- Dependências de runtime: MySQL (banco de usuários), RabbitMQ e Keycloak. O serviço espera `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` e, no perfil base/des, `KEYCLOAK_URI`.
+- Contrato OpenAPI: `ms-user/src/main/resources/swagger/openapi.yaml`.
+
+### `ms-pet/`
+
+- Papel: cadastro e gerenciamento de pets, usuários referenciados e fotos; persistência JPA; consumo de eventos de usuários via RabbitMQ; publicação confiável de adoções por Outbox; armazenamento local ou S3 para fotos.
+- Tecnologia: Java 21, Spring Boot herdado pelo `pet-system-parent`, Spring MVC, Spring Data JPA, MySQL/H2, Spring AMQP/RabbitMQ, Actuator/Prometheus, Springdoc, OpenAPI Generator, AWS SDK S3, MapStruct, Lombok e Log4j2.
+- Perfil `local`: aplicação na porta `3005`; Actuator na porta `9092`; autenticação desabilitada. Banco, RabbitMQ e credenciais são configurados por ambiente.
+- Perfil `des`: aplicação na porta `3005`; Actuator na porta `9096`; autenticação habilitada e `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` e `KEYCLOAK_URI` são necessários.
+- Banco local em Docker: `ms-pet/docker-compose.yml` expõe MySQL na porta `3306`.
+- Contrato OpenAPI: `ms-pet/src/main/resources/swagger/openapi.yaml`.
+- Operação do Outbox de adoções: `docs/operations/ms-pet-outbox.md`.
+- Atenção: `pet-system-parent/pom.xml` é um projeto Maven independente do monorepo de pets e agrega somente `dependencies` e `core`. Os microserviços e o provider Keycloak não pertencem ao reactor do chassi; eles consomem `pet-system-starter-parent` e `pet-system-dependencies` por artefato instalado/publicado.
+
+### `ms-notification/`
+
+- Papel: consumidor dos eventos de adoção publicados pelo `ms-pet`; registra notificações pendentes de forma idempotente para posterior entrega por um canal de notificação.
+- Tecnologia: Java 21, Spring Boot 3.2.4, Spring MVC, Spring Data JPA, MySQL/H2, Spring AMQP/RabbitMQ, OAuth2 Resource Server, validação, Actuator e Lombok.
+- Perfil `local`: aplicação na porta `3006`; Actuator na porta `9097`; autenticação HTTP desabilitada e dependências apontando para localhost.
+- Perfil `des`: aplicação na porta `3006`; Actuator na porta `9097`; autenticação habilitada e `KEYCLOAK_URI`, credenciais de banco e RabbitMQ devem ser fornecidos por ambiente.
+- Banco local em Docker: `notifications_db` expõe MySQL na porta `3308`.
+- Configuração: `ms-notification/src/main/resources/application.yaml`, `application-local.yaml`, `application-des.yaml` e `src/test/resources/application-test.yaml`.
+- Integração: consome `PET_ADOPTED` do exchange `adoption.event.exchange`, routing key `adoption.event.created` e fila `notification.adoption.queue`.
+- Limite atual: ainda não há provedor externo de e-mail, SMS ou push; a notificação é persistida com status `PENDING`.
+
+## Componentes compartilhados e infraestrutura
+
+### `pet-system-parent/`
+
+- Parent e reactor Maven independente para o chassi corporativo, baseado em Spring Boot 3.3.2 e Java 21.
+- `dependencies/` é o BOM interno `pet-system-dependencies`, responsável pelas versões compartilhadas das bibliotecas.
+- `core/` agrega bibliotecas internas; `core/security/` publica `pet-system-security`, biblioteca Java de segurança/autoconfiguração usada pelos serviços. Não é um serviço HTTP e não possui porta.
+- `core/pet-system-starter-parent/pom.xml` publica o parent corporativo `pet-system-starter-parent`, junto das bibliotecas corporativas do `core`; ele importa o BOM e concentra o build comum das aplicações Spring Boot sem injetar dependências de runtime obrigatórias.
+- `gateway`, `ms-user`, `ms-pet` e `ms-notification` herdam `pet-system-starter-parent`; `custom-storage-provider` também consome o chassi conforme suas necessidades, mas nenhum desses módulos pertence ao reactor de `pet-system-parent`.
+
+### `infra-as-code/custom-storage-provider/`
+
+- Provider customizado de armazenamento de usuários para o Keycloak 24.0.0, integrado ao MySQL.
+- É um artefato JAR carregado pelo container do Keycloak; não é um microservice HTTP independente e não possui porta própria.
+- O JAR precisa existir em `infra-as-code/custom-storage-provider/docker/custom-storage-provider.jar` para o compose montar o provider.
+
+### Serviços Docker (`infra-as-code/docker-compose.yaml`)
+
+| Serviço | Papel | Porta local |
+|---|---|---:|
+| `keycloak_db` | PostgreSQL do Keycloak | `5432` |
+| `users_db` | MySQL do `ms-user` | `3306` |
+| `pets_db` | MySQL do `ms-pet` | `3307` → `3306` no container |
+| `notifications_db` | MySQL do `ms-notification` | `3308` → `3306` no container |
+| `keycloak` | Identidade/OIDC | `8080` |
+| `rabbitmq` | Mensageria AMQP | `5672`; painel `15672` |
+| `redis` | Token buckets distribuídos do gateway | `6379` |
+
+Os containers dos microservices e do gateway estão comentados no compose atual. Portanto, o fluxo local esperado é subir a infraestrutura via Docker e iniciar cada aplicação com Maven/IDE. O serviço Prometheus também está comentado no compose.
+
+Os bancos usam volumes independentes, todos montados no diretório de dados padrão do MySQL:
+
+- `infra-as-code_users_mysql_data` para `users_db`;
+- `infra-as-code_pets_mysql_data` para `pets_db`;
+- `infra-as-code_notifications_mysql_data` para `notifications_db`.
+
+`docker compose down` remove containers e rede, mas preserva esses dados. A remoção de um banco local deve citar explicitamente somente o volume pretendido, por exemplo `docker volume rm infra-as-code_notifications_mysql_data`, depois de remover o container correspondente e gerar um backup. Não use `docker compose down -v` no fluxo normal, pois ele apaga todos os volumes declarados pelo projeto.
+
+## Pré-requisitos e dependências
+
+- JDK 21.
+- Docker Desktop com Docker Compose v2 (`docker compose`).
+- Maven 3.6+; cada aplicação também possui Maven Wrapper (`mvnw`/`mvnw.cmd`). Preferir o wrapper para usar a versão compatível sem depender da instalação global.
+- Acesso à internet na primeira compilação para baixar dependências Maven.
+- Para o fluxo completo: MySQL, PostgreSQL, RabbitMQ, Redis e Keycloak podem ser iniciados pelo compose.
+
+## Como preparar e executar
+
+Na raiz do repositório, iniciar a infraestrutura:
+
+```powershell
+docker compose -f infra-as-code/docker-compose.yaml up -d
+```
+
+Construir o provider antes de iniciar/reiniciar o Keycloak:
+
+```powershell
+cd infra-as-code/custom-storage-provider
+.\mvnw.cmd clean install
+cd ..\..
+docker compose -f infra-as-code/docker-compose.yaml up -d keycloak
+```
+
+Variáveis mínimas para os serviços que usam MySQL:
+
+```powershell
+$env:DB_URL='jdbc:mysql://localhost:3306/users_store'
+$env:DB_USERNAME='<usuario-local>'
+$env:DB_PASSWORD='<senha-local>'
+$env:KEYCLOAK_URI='http://localhost:8080/realms/myrealm'
+```
+
+Executar os serviços em terminais separados. Para desenvolvimento local, o perfil `local` desabilita autenticação em `ms-user` e `ms-pet`:
+
+```powershell
+cd ms-user
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+
+cd ..\ms-pet
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+
+cd ..\ms-notification
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+
+cd ..\gateway
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+Para o perfil de deployment/desenvolvimento integrado, use `des` e forneça as variáveis de ambiente necessárias. As portas são `3000` (`ms-user`), `3005` (`ms-pet`) e `8085` (gateway):
+
+```powershell
+cd ms-user
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=des
+
+cd ..\ms-pet
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=des
+
+cd ..\gateway
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=des
+
+cd ..\ms-notification
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=des
+```
+
+## Instalação de dependências, testes e build
+
+O Maven resolve e instala dependências automaticamente durante `test`, `package` ou `install`; não há um gerenciador separado. Os comandos abaixo são executados dentro do diretório do módulo.
+
+Instalar o parent e a biblioteca compartilhada:
+
+```powershell
+cd pet-system-parent
+.\mvnw.cmd clean install
+```
+
+Executar testes:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Gerar o build/JAR:
+
+```powershell
+.\mvnw.cmd clean package
+```
+
+Instalar no repositório Maven local e copiar o JAR para o diretório `docker/` (configurado pelo `maven-dependency-plugin`):
+
+```powershell
+.\mvnw.cmd clean install
+```
+
+Executar o JAR gerado:
+
+```powershell
+java -jar target/*.jar
+```
+
+No PowerShell, para executar explicitamente um arquivo específico, use `java -jar (Get-ChildItem target\*.jar | Select-Object -First 1).FullName`.
+
+O chassi é instalado separadamente a partir de `pet-system-parent`. Depois disso, os serviços e o provider podem ser compilados individualmente, pois não pertencem ao reactor do chassi. Para uma compilação integrada do projeto de pets, use um reactor próprio na raiz do monorepo ou compile os módulos em sequência após instalar o chassi.
+
+## Convenções úteis para alterações
+
+- Padrões de código: [`code-standards.md`](../rules/code-standards.md).
+- Regras de testes: [`tests.md`](../rules/tests.md).
+- Skill para testes unitários Java/JUnit: [`java-junit`](../skills/java-junit/SKILL.md).
+- Skill para testes Spring Boot: [`springboot-test`](../skills/springboot-test/SKILL.md).
+- Skill para normalização textual de prompts: [`prompt-token-normalizer`](../skills/prompt-token-normalizer/SKILL.md).
+- Skill de convenções Spring Boot e Spring Framework: [`spring-boot-conventions`](../skills/spring-boot-conventions/SKILL.md).
+- Skill de Contract-First e geração a partir de OpenAPI: [`openapi-contract-first`](../skills/openapi-contract-first/SKILL.md).
+- Regra de análise e contexto centralizado: [`project-analysis`](../rules/project-analysis.md).
+- Contexto do fluxo de notificações: [`contexto.01.md`](../../docs/context/ms-notification/contexto.01.md).
+- Contexto do rate limiting do gateway: [`contexto.02.md`](../../docs/context/gateway/contexto.02.md).
+- Contexto do teste E2E local entre os componentes: [`contexto.01.md`](../../docs/context/pet-adoption-system/contexto.01.md).
+- Release atual de confiabilidade do fluxo, contratos e volumes: [`contexto.02.md`](../../docs/context/pet-adoption-system/contexto.02.md).
+- Contexto e backlog de conformidade do `ms-user`: [`contexto.01.md`](../../docs/context/ms-user/contexto.01.md) e [`todo.md`](../../docs/context/ms-user/todo.md).
+- APIs seguem Contract-First/OpenAPI; atualizar a especificação em `src/main/resources/swagger/openapi.yaml` quando o contrato mudar.
+- Eventos assíncronos seguem JSON Schema Contract-First; atualizar [`contracts/events`](../../contracts/events/README.md) e as fixtures compartilhadas quando um envelope ou payload mudar.
+- O código gerado pelo OpenAPI usa o padrão Delegate. A lógica manual deve ficar nas implementações de delegate/adapters, não em arquivos gerados.
+- A arquitetura dos serviços segue Ports and Adapters/Hexagonal: domínio isolado, adapters inbound para REST/mensageria e outbound para persistência/integrações.
+- Antes de alterar portas, perfis ou nomes de variáveis, verificar também as rotas do gateway, os Dockerfiles e `infra-as-code/docker-compose.yaml`.
