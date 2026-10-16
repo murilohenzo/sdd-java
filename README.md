@@ -20,8 +20,6 @@ O carregamento progressivo mantém as descrições disponíveis para seleção e
 4. Ajuste links para o README do destino. Se quiser a validação estrutural, copie também `scripts/validate_structure.py` e seus testes; adapte o comando de validação ao ambiente.
 5. Use uma funcionalidade real e pequena para avaliar o fluxo. Contexto versionado, blueprint e ADRs continuam opcionais até serem adotados pela equipe.
 
-O antigo perfil de Pet Adoption System foi preservado em [snapshot histórico](docs/archive/profile-pet-adoption.original.txt). Ele não descreve este repositório e não deve ser copiado como configuração.
-
 ## Fluxo de trabalho
 
 `PRD → TechSpec → tarefas → implementação → review → QA`
