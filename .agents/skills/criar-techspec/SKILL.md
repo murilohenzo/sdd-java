@@ -7,7 +7,7 @@ description: Cria ou atualiza TechSpec a partir de um PRD, com solução técnic
 
 ## Entrada e leitura
 
-Resolva o slug conforme [o contrato SDD](../../rules/spec-driven-development.md). Entrada: `tasks/prd-<slug>/prd.md` pronto para desenho. Leia-o integralmente, o perfil, a TechSpec existente e [o template](references/TEMPLATE.md). Se o PRD faltar ou tiver bloqueador material, siga o tratamento de pré-requisitos da regra comum.
+Resolva o slug conforme [o contrato SDD](../../rules/spec-driven-development.md). Entrada: `tasks/prd-<slug>/prd.md` pronto para desenho. Leia-o integralmente, o perfil quando existir, a TechSpec existente quando houver e [o template](references/TEMPLATE.md). Se o PRD faltar ou tiver bloqueador material, siga o tratamento de pré-requisitos da regra comum.
 
 ## Procedimento
 

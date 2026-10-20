@@ -34,9 +34,11 @@ Documentos de especificação usam `rascunho`, `pronto` ou `desatualizado`, revi
 2. **TechSpec pronta para tarefas:** PRD de referência identificado, componentes e integrações localizados ou explicitamente propostos, decisões justificadas e cada CA ligado a uma verificação com resultado esperado.
 3. **Tarefas prontas para execução:** cobertura completa, dependências existentes e sem ciclos, entregas delimitadas, comandos/ambiente de validação identificados e ausência de bloqueadores do escopo selecionado.
 4. **Tarefa concluída:** implementação presente, critérios da entrega satisfeitos e verificações exigidas aprovadas com evidências. Mudanças apenas escritas ou testes bloqueados mantêm a tarefa aberta.
-5. **Funcionalidade validada:** verificações exigidas e CA atendidos, sem defeitos bloqueantes, documentação coerente e relatórios das etapas solicitadas atualizados. Não confunda conclusão de uma tarefa com aceite de toda a funcionalidade.
+5. **Funcionalidade validada:** todas as obrigações vigentes do PRD percorrem `RF/RNF → CA → verificação → tarefa → evidência` no código/configuração avaliados; tarefas do plano vigente concluídas, CA e checks exigidos atendidos, sem defeitos bloqueantes, specs coerentes e etapas exigidas sem veredito bloqueado ou reprovado. Não confunda conclusão de uma tarefa com aceite de toda a funcionalidade.
 
 Antes de implementar, verifique ambiguidades, contradições, cobertura e dependências. Use `validar-spec` para uma análise dedicada; o checklist pode ser feito na própria execução sem criar outro relatório obrigatório. Não existe certificação automática de prontidão por mera presença dos arquivos.
+
+Ao encerrar uma entrega SDD completa, reconcilie o resultado de review e QA com o PRD e o plano: confira também referências sem origem, CA sem evidência atual e trabalho ainda aberto. Se houver obrigação não atendida, corrija dentro do escopo autorizado, reabra a tarefa cuja conclusão foi invalidada ou acrescente uma entrega rastreável, e repita somente as verificações afetadas. Um pedido restrito a review ou QA registra a lacuna e o próximo passo sem presumir autorização para implementar.
 
 ## Estados e evidências
 

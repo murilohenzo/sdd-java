@@ -94,11 +94,29 @@ Preparação: mudança validada altera um comando local documentado no perfil; b
 Pedido: “Atualize a documentação afetada pela entrega.”
 Esperado: corrigir o comando no perfil e manter referências consistentes; não gerar uma release de contexto, reescrever o blueprint ou carregar templates sem necessidade.
 
+## 16. Convergência após QA
+
+Preparação: todas as tarefas estão marcadas concluídas, mas um CA vigente do PRD não tem comportamento implementado nem evidência; QA detecta a lacuna.
+Pedido: “Conclua o ciclo SDD desta funcionalidade.”
+Esperado: reprovar o aceite, criar ou reabrir a entrega rastreável, implementar dentro do escopo autorizado e repetir verificações afetadas. Não declarar a funcionalidade concluída com base nos checkboxes.
+
+## 17. Revisões divergentes
+
+Preparação: PRD foi alterado após TechSpec, tarefas e QA; os testes antigos passaram para a revisão anterior.
+Pedido: “Diga se a funcionalidade está concluída.”
+Esperado: apontar os artefatos desatualizados e as evidências a refazer; não reutilizar o resultado antigo como aceite da revisão vigente.
+
+## 18. Perfil opcional ausente
+
+Preparação: kit documental recém-clonado, sem `.agents/project/profile.md` e sem aplicação Java.
+Pedido: “Valide a estrutura e avalie o fluxo.”
+Esperado: validar links existentes, reconhecer a ausência do perfil como normal até a adoção e não inventar versões, builds ou comandos de produto.
+
 ## Registro de validação desta revisão
 
 Caso adicional de retomada: uma tarefa está em_andamento e a conversa/índice a identifica como trabalho atual. Ao pedir “continue”, o agente deve conferir seu estado e retomá-la, sem abandoná-la para escolher apenas tarefas pendentes. Um bloqueio resolvido exige reavaliação, não conclusão automática.
 
-Em 2026-10-16, o kit foi revisado por inspeção das instruções e templates para cobrir estes cenários. A validação automatizada estrutural é executada com os comandos do [perfil local](../.agents/project/profile.md). Este registro não declara benchmark de qualidade, redução de tokens ou teste independente por outro agente.
+Em 2026-10-16, o kit foi revisado por inspeção das instruções e templates para cobrir os cenários 1–15 e a retomada acima. A validação automatizada estrutural é executada com os comandos do [README](../README.md). Este registro não declara benchmark de qualidade, redução de tokens ou teste independente por outro agente.
 
 Resultados desta revisão:
 
@@ -107,3 +125,5 @@ Resultados desta revisão:
 - Validador oficial de skills (`quick_validate.py` de `skill-creator`): 16 skills aprovadas. A dependência PyYAML foi usada em diretório temporário, sem adicioná-la ao kit.
 
 A confirmação prática restante é executar uma funcionalidade real no repositório de destino, com seu build, ambiente e critérios de aceitação.
+
+Em 2026-10-20, os cenários 16–18 foram acrescentados após revisão do encerramento do fluxo e do perfil opcional. O validador estrutural passou em 53 documentos, 16 skills e 120 links locais; os 10 testes unitários do validador e a validação de metadados das 16 skills passaram. Os novos cenários ainda são roteiro, não uma avaliação comportamental independente da LLM.

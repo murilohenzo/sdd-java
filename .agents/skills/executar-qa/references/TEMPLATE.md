@@ -9,12 +9,17 @@
 
 Para cada CA:
 
-- ID e verificações associadas: [CA-* e casos da TechSpec].
+- Requisito, ID e verificações associadas: [RF/RNF-*, CA-* e casos da TechSpec].
+- Tarefa responsável: [ID do plano].
 - Resultado esperado: [resumo fiel ao PRD].
 - Procedimento/comando e diretório: [como reproduzir].
 - Resultado observado: [evidência concreta].
-- Estado: [PASSOU | FALHOU | BLOQUEADO | NÃO EXECUTADO].
+- Estado do CA e de cada verificação exigida: [PASSOU | FALHOU | BLOQUEADO | NÃO EXECUTADO].
 - Evidência: [log, resposta, evento, estado persistido ou captura pertinente].
+
+## Fechamento da rastreabilidade
+
+[Para cada RF/RNF vigente, indique os CA e seu resultado. Registre CA sem verificação, tarefa ou evidência da revisão avaliada; IDs sem origem e tarefas ainda abertas. Não repita os detalhes de execução já registrados acima.]
 
 ## Checks complementares
 
@@ -30,4 +35,4 @@ Para cada defeito: [ID, severidade, reprodução, impacto, estado, correção qu
 
 ## Conclusão
 
-[Fundamento do veredito e pendências que impedem aceite. Não concluir APROVADO sem todos os CA/checks exigidos atendidos.]
+[Fundamento do veredito, estado das tarefas do plano vigente, revisões reconciliadas e pendências que impedem aceite. Não concluir APROVADO sem todas as obrigações, CA e checks exigidos atendidos.]

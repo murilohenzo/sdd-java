@@ -5,7 +5,7 @@ Kit de instruções para usar LLMs no desenvolvimento Java/Spring Boot orientado
 ## Organização
 
 - [AGENTS.md](AGENTS.md): entrada curta, fontes de verdade, limites e roteamento.
-- [.agents/project/profile.md](.agents/project/profile.md): fatos e decisões exclusivos do repositório.
+- `.agents/project/profile.md` (quando existir): fatos e decisões exclusivos do repositório; use [o modelo](.agents/project/profile.example.md) ao adotá-lo.
 - [.agents/rules/](.agents/rules/): restrições comuns, carregadas conforme o trabalho.
 - [.agents/skills/](.agents/skills/): procedimentos por intenção, com templates e referências sob demanda.
 - [scripts/validate_structure.py](scripts/validate_structure.py): verificação estrutural do kit.
@@ -22,9 +22,9 @@ O carregamento progressivo mantém as descrições disponíveis para seleção e
 
 ## Fluxo de trabalho
 
-`PRD → TechSpec → tarefas → implementação → review → QA`
+`PRD → TechSpec → tarefas → checagem de consistência → implementação → review → QA → reconciliação com o PRD`
 
-A [regra SDD](.agents/rules/spec-driven-development.md) define entradas, saídas, critérios de prontidão, rastreabilidade, estados e controle de mudanças. A validação de consistência ocorre antes da implementação e quando as specs mudam; [validar-spec](.agents/skills/validar-spec/SKILL.md) permite executá-la como uma etapa dedicada.
+A [regra SDD](.agents/rules/spec-driven-development.md) define entradas, saídas, critérios de prontidão, rastreabilidade, estados e controle de mudanças. A validação de consistência ocorre antes da implementação e quando as specs mudam; [validar-spec](.agents/skills/validar-spec/SKILL.md) permite executá-la como uma etapa dedicada. Ao final de um ciclo completo, review e QA alimentam a reconciliação entre requisitos, tarefas e evidências; lacunas retornam à etapa afetada. Pedidos parciais executam apenas as etapas abrangidas pelo escopo.
 
 A [regra project-analysis](.agents/rules/project-analysis.md) apoia essas etapas quando há contexto desconhecido, impacto entre módulos ou documentação afetada. Ela delimita a investigação e o destino dos achados: perfil para fatos compartilhados, specs para a funcionalidade, blueprint ou release de contexto somente quando necessários e solicitados/adotados. Não acrescenta uma auditoria obrigatória a cada tarefa.
 

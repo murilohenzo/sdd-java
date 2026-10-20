@@ -4,7 +4,7 @@ Este arquivo é o ponto de entrada. Use o perfil para fatos locais, rules para r
 
 ## Contexto e fontes de verdade
 
-1. Leia [o perfil local](.agents/project/profile.md), quando existir, e confira suas evidências no repositório. Perfil copiado ou desatualizado não comprova módulos, versões ou comandos.
+1. Leia `.agents/project/profile.md`, quando existir, e confira suas evidências no repositório. Perfil copiado ou desatualizado não comprova módulos, versões ou comandos.
 2. Para mudanças de software, identifique módulos, versões efetivas de Java/Spring/plugins, modelo de execução e dependências nos builds, wrappers e configurações relacionados ao escopo. Se não existirem, registre a ausência; não invente uma aplicação.
 3. Código, build, testes e configuração comprovam o **estado atual**. PRD e TechSpec vigentes definem o **estado desejado da mudança autorizada**. Não altere requisitos para legitimar um bug, nem trate uma proposta como já implementada.
 4. Classifique informação relevante como observada, inferida, proposta ou pendente. Em conflito material, registre a divergência e resolva a decisão antes de executar o trecho afetado.
@@ -12,6 +12,8 @@ Este arquivo é o ponto de entrada. Use o perfil para fatos locais, rules para r
 ## Fluxo de especificação
 
 Para trabalho orientado por especificação, leia [spec-driven-development.md](.agents/rules/spec-driven-development.md). Os artefatos ficam em `tasks/prd-<slug>/`; não carregue outras funcionalidades sem necessidade.
+
+Em uma entrega SDD completa, siga PRD → TechSpec → tarefas → checagem de consistência → implementação → review → QA → reconciliação final com o PRD. Se a checagem ou a validação revelar uma lacuna, atualize a fonte correta, retome o trabalho afetado e revalide; não declare a funcionalidade concluída por haver documentos ou tarefas marcadas.
 
 - Problema, escopo e critérios de aceitação: [criar-prd](.agents/skills/criar-prd/SKILL.md).
 - Solução técnica derivada do PRD: [criar-techspec](.agents/skills/criar-techspec/SKILL.md).

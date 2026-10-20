@@ -7,7 +7,7 @@ description: Cria ou atualiza PRD com problema, escopo, requisitos e critérios 
 
 ## Entrada e leitura
 
-Use a descrição do usuário e o contexto do produto disponível. Leia [o contrato SDD](../../rules/spec-driven-development.md), o perfil local e [o template](references/TEMPLATE.md). Identifique o slug e preserve um PRD existente ao atualizá-lo.
+Use a descrição do usuário e o contexto do produto disponível. Leia [o contrato SDD](../../rules/spec-driven-development.md), o perfil local quando existir e [o template](references/TEMPLATE.md). Identifique o slug e preserve um PRD existente ao atualizá-lo.
 
 ## Procedimento
 
