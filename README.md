@@ -1,99 +1,87 @@
 # sdd-java
 
-Kit de instruções para usar LLMs no desenvolvimento Java/Spring Boot orientado por especificações. Não contém uma aplicação Java nem exige uma versão, arquitetura ou ferramenta de build específica.
+Kit de **desenvolvimento orientado por especificações (SDD)** para projetos Java e Spring Boot. Reúne regras, skills e templates para transformar uma solicitação em requisitos verificáveis, decisões arquiteturais, tarefas e evidências de aceite.
 
-## Organização
+O [exemplo Spring Boot](example/README.md) acompanha uma API greenfield de reserva de estoque do PRD ao QA. O piloto usa [Elephant-Goldfish](#use-elephant-goldfish) para testar se outro agente consegue interpretar a especificação antes da implementação.
 
-- [AGENTS.md](AGENTS.md): entrada curta, fontes de verdade, limites e roteamento.
-- `.agents/project/profile.md` (quando existir): fatos e decisões exclusivos do repositório; use [o modelo](.agents/project/profile.example.md) ao adotá-lo.
-- [.agents/rules/](.agents/rules/): restrições comuns, carregadas conforme o trabalho.
-- [.agents/skills/](.agents/skills/): procedimentos por intenção, com templates e referências sob demanda.
-- [scripts/validate_structure.py](scripts/validate_structure.py): verificação estrutural do kit.
+- [Execute o exemplo](#execute-o-exemplo)
+- [Conduza o fluxo SDD](#conduza-o-fluxo-sdd)
+- [Use Elephant-Goldfish](#use-elephant-goldfish)
+- [Adote o kit em outro projeto](#adote-o-kit-em-outro-projeto)
+- [Valide e versione a entrega](#valide-e-versione-a-entrega)
 
-O carregamento progressivo mantém as descrições disponíveis para seleção e lê o corpo de cada skill somente quando pertinente, conforme a [documentação oficial de skills](https://learn.chatgpt.com/docs/build-skills). O `AGENTS.md` concentra o roteamento; o mecanismo de descoberta e escopo está na [documentação oficial de AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md). Os Markdown em `.agents/rules/` são uma convenção deste kit, explicitamente referenciada, não uma configuração automática do cliente.
+## Execute o exemplo
 
-## Como adotar em um projeto
-
-1. Integre o conteúdo de `AGENTS.md` às instruções existentes, preservando decisões locais e instruções dos módulos. Copie as rules e skills relevantes sem sobrescrever customizações.
-2. Recrie `.agents/project/profile.md` com [profile.example.md](.agents/project/profile.example.md), a partir de builds, código, configuração, contratos e CI do projeto de destino.
-3. Registre versões efetivas, arquitetura, comandos, diretórios, pré-requisitos e checks exigidos. Não adote tecnologias apenas por constarem em exemplos.
-4. Ajuste links para o README do destino. Se quiser a validação estrutural, copie também `scripts/validate_structure.py` e seus testes; adapte o comando de validação ao ambiente.
-5. Use uma funcionalidade real e pequena para avaliar o fluxo. Contexto versionado, blueprint e ADRs continuam opcionais até serem adotados pela equipe.
-
-## Fluxo de trabalho
-
-`PRD → TechSpec → tarefas → checagem de consistência → implementação → review → QA → reconciliação com o PRD`
-
-A [regra SDD](.agents/rules/spec-driven-development.md) define entradas, saídas, critérios de prontidão, rastreabilidade, estados e controle de mudanças. A validação de consistência ocorre antes da implementação e quando as specs mudam; [validar-spec](.agents/skills/validar-spec/SKILL.md) permite executá-la como uma etapa dedicada. Ao final de um ciclo completo, review e QA alimentam a reconciliação entre requisitos, tarefas e evidências; lacunas retornam à etapa afetada. Pedidos parciais executam apenas as etapas abrangidas pelo escopo.
-
-A [regra project-analysis](.agents/rules/project-analysis.md) apoia essas etapas quando há contexto desconhecido, impacto entre módulos ou documentação afetada. Ela delimita a investigação e o destino dos achados: perfil para fatos compartilhados, specs para a funcionalidade, blueprint ou release de contexto somente quando necessários e solicitados/adotados. Não acrescenta uma auditoria obrigatória a cada tarefa.
-
-Exemplos de pedidos, usando o nome da skill em linguagem natural:
-
-- “Use criar-prd para definir a funcionalidade de reserva de estoque.”
-- “Use criar-techspec para a funcionalidade em tasks/prd-reserva-estoque.”
-- “Use criar-tasks para essa TechSpec.”
-- “Use validar-spec para verificar se reserva-estoque está pronta para implementação.”
-- “Use executar-task para implementar a tarefa 1.0 de reserva-estoque.”
-- “Use executar-review para revisar a implementação de reserva-estoque.”
-- “Use executar-qa para validar os critérios de reserva-estoque e corrigir os bugs encontrados.”
-
-Esses exemplos são pedidos ao agente, não comandos de terminal. Um único pedido também pode abranger várias etapas; não há obrigação de aprovar novamente o que já foi autorizado. Pedidos só de planejamento param na entrega dos documentos. Uma correção pequena independente pode seguir um fluxo proporcional, sem produzir specs artificiais.
-
-## Commit ao encerrar uma entrega
-
-A skill [criar-commit](.agents/skills/criar-commit/SKILL.md) prepara mensagens ou cria commits locais seguindo [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), quando solicitado. Ela usa um único arquivo de instruções e reaproveita o contexto e as evidências do SDD, sem carregar templates ou reler todas as especificações.
-
-Exemplos de pedidos ao agente:
+Com **Java 21 e Maven**, execute na raiz do repositório:
 
 ```text
-Use criar-commit --dry-run
-Use criar-commit --type fix --scope estoque --summary "evita reserva duplicada"
-Use criar-commit --prd reserva-estoque --task 1 --files "src/main/java/Reserva.java" "src/test/java/ReservaTest.java"
-Use criar-commit --type feat --scope api --breaking "remove campo legado; use identificador" --dry-run
+mvn -f example/pom.xml -B -ntp verify
 ```
 
-Sem `--files`, o alvo é o conteúdo já staged. `--files` aceita lista ou repetição e seleciona o estado completo dos caminhos indicados; `--dry-run` não altera index nem histórico. Tipo e resumo podem ser inferidos do diff. Os argumentos são interpretados pela LLM, não por um programa instalado. Commit não é uma etapa automática de toda tarefa e não executa push.
+O módulo implementa `POST /reservations`, com saldo e chaves de idempotência em memória durante a vida do processo. A suíte verifica criação, replay, conflitos, entradas inválidas e concorrência. O QA também registra a verificação de escuta local e reinício com o JAR empacotado. [Inicie a API e teste o replay](example/README.md#execute-a-api) · [Veja as evidências de QA](example/tasks/prd-reserva-estoque/qa.md)
 
-## Artefatos de uma funcionalidade
+Para ler a entrega na ordem em que foi construída, siga o [percurso do exemplo](example/README.md#percorra-o-sdd).
+
+## Conduza o fluxo SDD
+
+`PRD + blueprint → TechSpec → tarefas → validação da especificação → implementação → review → QA → reconciliação com o PRD`
+
+1. **Defina o comportamento.** Registre o problema, o escopo, os RF/RNF e critérios de aceite observáveis. Crie o blueprint junto ao PRD e revise-o quando a mudança for material. Descreva fronteiras e consumidores, compare ganhos e perdas das alternativas relevantes e avalie um ADR para decisões duradouras. Em greenfield, registre lacunas de implementação e premissas. Em um sistema existente, confirme o fluxo e os contratos nas fontes. [Criar PRD](.agents/skills/criar-prd/SKILL.md) · [Gerar blueprint](.agents/skills/architecture-blueprint-generator/SKILL.md) · [Avaliar arquitetura](.agents/skills/avaliar-arquitetura/SKILL.md)
+2. **Desenhe e planeje.** Transforme requisitos e decisões em componentes, contratos e verificações na TechSpec. Divida a entrega em tarefas com dependências, critérios de conclusão e IDs estáveis. [Criar TechSpec](.agents/skills/criar-techspec/SKILL.md) · [Criar tarefas](.agents/skills/criar-tasks/SKILL.md)
+3. **Verifique a prontidão.** Confira se a especificação permite implementar e testar cada obrigação. Resolva as lacunas que bloqueiam a etapa. Use revisão independente para o escopo de maior impacto. [Validar especificação](.agents/skills/validar-spec/SKILL.md)
+4. **Implemente e confirme o aceite.** Parta de `tasks.md` e siga os critérios e decisões da tarefa, incluindo as restrições transversais. Faça review de código, valide o comportamento em QA e percorra `RF/RNF → CA → verificação → tarefa → evidência`. Ao detectar uma divergência, corrija na fonte e revalide os vínculos afetados. [Executar tarefa](.agents/skills/executar-task/SKILL.md) · [Revisar código](.agents/skills/executar-review/SKILL.md) · [Executar QA](.agents/skills/executar-qa/SKILL.md)
+
+Indique ao agente a funcionalidade pelo caminho ou slug e diga até qual etapa ele pode avançar. Por exemplo, “Crie o PRD e o blueprint de reserva de estoque” delimita a descoberta. “Retome a tarefa 2.0 do PRD informado” começa pelo estado da entrega. O contrato SDD define quando cada artefato está `pronto` e o que permite encerrar a funcionalidade. [Contrato SDD](.agents/rules/spec-driven-development.md)
+
+### Onde fica cada informação
 
 ```text
 tasks/prd-<slug>/
-  prd.md             requisitos, escopo e critérios CA-*
-  techspec.md        desenho e verificações TU/TI/TC/E2E/MAN
+  prd.md             requisitos, escopo e critérios de aceite
+  blueprint.md       arquitetura afetada, trade-offs e avaliação de ADR
+  techspec.md        desenho, contratos e casos de verificação
   tasks.md           índice, dependências e mapa de cobertura
-  task_1.md          entrega, subtarefas e evidências
-  spec-review.md     quando a validação dedicada for executada
-  codereview.md      quando a revisão for executada
-  qa.md              quando o QA for executado
-  evidences/         apenas quando houver evidências a salvar
+  task_<n>.md        entrega, verificações e evidências de execução
+  spec-review.md     validação dedicada da especificação
+  codereview.md      revisão da implementação
+  qa.md              resultado do aceite funcional
+  evidences/         evidências avulsas quando necessárias
 ```
 
-A cadeia `RF/RNF → CA → verificação → tarefa → evidência` torna cada obrigação verificável. IDs são estáveis; contratos e detalhes técnicos têm uma fonte principal e são referenciados pelos demais artefatos.
+Código, build e configuração comprovam o estado atual. O PRD descreve o comportamento esperado e a TechSpec define o desenho. Registre ADRs na convenção do projeto ou em `docs/architecture/adr/`. Mantenha o blueprint macro e releases de contexto quando solicitados ou adotados no projeto. [Análise de contexto](.agents/rules/project-analysis.md)
 
-O código comprova o estado atual; a especificação vigente descreve a mudança pretendida. Essa separação aplica o princípio de dirigir a implementação pela especificação, apresentado pelo [GitHub Spec Kit](https://github.com/github/spec-kit/blob/main/spec-driven.md), sem importar suas convenções de CLI, biblioteca ou arquitetura como obrigações deste kit.
+## Use Elephant-Goldfish
 
-## Critérios de qualidade
+Use uma passagem independente quando uma interpretação diferente puder afetar contratos públicos, consistência de dados, concorrência ou vários módulos. A validação local cobre mudanças delimitadas com o mesmo critério de prontidão.
 
-- Requisito com resultado observável, origem e ausência de ambiguidade material.
-- Decisões técnicas compatíveis com o projeto e diferenciadas de fatos observados.
-- Tarefas com dependências válidas, critérios de conclusão e verificações suficientes.
-- Evidências reais: `NÃO EXECUTADO` e `BLOQUEADO` não significam `PASSOU`.
-- Backend, mensageria, biblioteca e batch podem ter QA sem navegador.
-- Mudanças de requisitos propagadas aos artefatos dependentes, sem apagar histórico válido.
-- Concisão obtida por leitura seletiva e remoção de duplicação; requisitos e contratos preservam linguagem precisa.
+- **Elephant** — o agente autor mantém o contexto da descoberta e registra as decisões nos artefatos.
+- **Goldfish** — um revisor em contexto novo, sem o histórico do autor, recebe apenas a etapa, as revisões das specs, as restrições e as fontes que afetam o escopo. Ele reconstrói o comportamento esperado e aponta ambiguidades ou obrigações sem cobertura.
+- **Reconciliação** — o autor confirma os achados nas fontes, corrige os documentos quando autorizado e revalida os critérios e dependências afetados. Consolida a passagem independente no mesmo `spec-review.md`.
 
-`pronto` significa que o documento satisfaz os critérios da etapa, não uma aprovação humana. Conclusão de uma tarefa também não equivale ao aceite de toda a funcionalidade.
+Peça a revisão com o caminho exato. Este é um pedido ao agente:
 
-## Manutenção e validação
+> Use validar-spec em modo Elephant-Goldfish para avaliar a prontidão de implementação em `example/tasks/prd-reserva-estoque/`. Faça uma passagem em contexto novo, somente leitura, e registre achados, evidências e veredito no relatório da funcionalidade.
 
-Com Python 3.10+ disponível, na raiz:
+O modo usa a delegação em contexto novo do ambiente. Se ela estiver indisponível, registre a passagem como `NÃO EXECUTADO` e aplique a checagem local se a etapa permitir. Quando a independência for exigida para liberar a etapa, o veredito fica `BLOQUEADO`. [Procedimento do kit](.agents/skills/validar-spec/references/elephant-goldfish.md) · [Modelo EGM](https://github.com/google/elephant-goldfish-model)
+
+**O que o piloto demonstrou.** O revisor identificou três lacunas materiais e uma ambiguidade no formato da quantidade antes do código. Uma delas era a prova do saldo exato. Confirmar uma reserva final de quatro unidades provava apenas que havia pelo menos quatro. O plano passou a exigir a rejeição de cinco seguida da confirmação de quatro. A implementação passou nos 25 testes e o QA verificou os seis critérios de aceite. Ganhos de tempo, retrabalho e tokens ainda precisam de comparação controlada. [Relatório do piloto](example/tasks/prd-reserva-estoque/spec-review.md) · [Como avaliar](example/README.md#avalie-a-revisão-independente)
+
+## Adote o kit em outro projeto
+
+1. Integre o [AGENTS.md](AGENTS.md) às instruções do repositório de destino. Preserve as convenções e instruções dos módulos.
+2. Copie as [regras](.agents/rules/) e [skills](.agents/skills/) que serão usadas. O guia do projeto indica quando carregar cada regra ou skill.
+3. Preencha `.agents/project/profile.md` com os módulos, versões, arquitetura, contratos e comandos confirmados no destino. Registre critérios locais de revisão independente se a equipe os adotar. [Modelo de perfil](.agents/project/profile.example.md)
+4. Comece por uma funcionalidade pequena e compare o resultado com o [exemplo](example/README.md) e os [cenários de avaliação](docs/sdd-validation.md).
+
+## Valide e versione a entrega
+
+Com Python 3.10 ou superior, execute na raiz:
 
 ```text
 python scripts/validate_structure.py
 python -m unittest discover -s scripts/tests -v
 ```
 
-O validador não instala dependências nem modifica arquivos. Confere campos obrigatórios de descoberta, nomes/diretórios das skills e destinos de links Markdown locais. Não é parser completo de YAML/Markdown, não verifica âncoras ou URLs externas e não resolve links de saída em `TEMPLATE*.md` no diretório da skill. Templates e consistência semântica exigem revisão própria.
+Esses checks cobrem metadados das skills e links locais do kit. Para verificar a API, rode a suíte Maven do exemplo. Para avaliar o comportamento da LLM, compare achados válidos, falsos positivos, tempo e tokens totais usando os mesmos artefatos de entrada. [Roteiro de avaliação](docs/sdd-validation.md#comparação-entre-versões-do-kit)
 
-Os [cenários de avaliação](docs/sdd-validation.md) ajudam a verificar decisões do agente em pedidos realistas. Não há medição de ganho de qualidade ou tokens por modelo neste kit; menor contexto de entrada é uma melhoria estrutural, não garantia de desempenho.
+Quando a entrega estiver validada, use [criar-commit](.agents/skills/criar-commit/SKILL.md) para preparar ou registrar um Conventional Commit. A simulação `Use criar-commit --dry-run` parte do conteúdo staged. Use `--files` para delimitar a seleção quando necessário.

@@ -1,25 +1,27 @@
 ---
 name: validar-spec
-description: Analisa consistência, ambiguidades e rastreabilidade de PRD, TechSpec e tarefas antes da implementação ou após mudança de requisitos. Use para validar especificações; não para revisar código ou executar QA.
+description: Verifica ambiguidades, rastreabilidade e coerência entre PRD, blueprint, ADRs, TechSpec e tarefas, com modo independente Elephant-Goldfish. Use ao liberar uma etapa do SDD ou revisar especificações alteradas.
 ---
 
 # Validar especificação
 
 ## Entrada e leitura
 
-Leia [o contrato SDD](../../rules/spec-driven-development.md) e [o template](references/TEMPLATE.md). Resolva a funcionalidade e a etapa que se quer liberar. Leia o PRD e os demais artefatos já existentes em `tasks/prd-<slug>/`.
+Leia [o contrato SDD](../../rules/spec-driven-development.md) e [o template](references/TEMPLATE.md). Resolva a funcionalidade e a etapa que se quer liberar. Leia o PRD, o blueprint e os artefatos pertinentes em `tasks/prd-<slug>/`, além dos ADRs vinculados que afetem a etapa.
 
-Não exija tarefas para validar somente um PRD. Para validar prontidão para implementação, PRD, TechSpec e tarefas são necessários.
+Para liberar o desenho, confira o PRD e o blueprint quando exigido. Para liberar o planejamento de tarefas, inclua a TechSpec. Para liberar a implementação, inclua também o plano e as tarefas.
+
+Use [o procedimento Elephant-Goldfish](references/elephant-goldfish.md) quando o usuário solicitar revisão independente ou uma convenção local autorizá-la. É especialmente útil quando uma interpretação errada afetaria contratos, dados, concorrência ou múltiplos módulos. Nesse modo, o revisor assume a checagem de compreensão e prontidão no escopo selecionado. O agente principal consolida os achados e confere a rastreabilidade.
 
 ## Procedimento
 
-1. Identifique revisões, estado, fontes, decisões do usuário e pendências. Confira se os artefatos descrevem a mesma funcionalidade e versão de escopo.
-2. Procure requisitos ambíguos, contraditórios, não verificáveis ou sem fonte; metas inventadas; suposições tratadas como fatos; conflitos com restrições e exclusões.
-3. Quando houver TechSpec, confira cada CA contra solução e verificações com resultados esperados. Diferencie tecnologia observada e proposta; use apenas regras técnicas aplicáveis.
-4. Quando houver tarefas, percorra `RF/RNF → CA → verificação → tarefa` nos dois sentidos. Detecte IDs inexistentes/duplicados, obrigação sem cobertura, tarefa sem propósito e dependências ausentes ou cíclicas.
-5. Confira critérios de conclusão, comandos/ambiente, riscos de compatibilidade/migração pertinentes e viabilidade das verificações. Não execute código de produto nesta análise.
-6. Classifique cada achado como bloqueador da etapa ou melhoria, indicando evidência, consequência e correção sugerida. Não reescreva documentos como efeito colateral de um pedido restrito à análise.
-7. Salve `spec-review.md` com `PRONTO` ou `BLOQUEADO` **para a etapa avaliada**. Se o pedido incluir correções, atualize os artefatos autorizados, preserve decisões e repita as checagens afetadas.
+1. Identifique revisões, fontes e decisões relevantes para a etapa. Se as revisões divergirem, verifique quais requisitos, restrições ou decisões mudaram e avalie os vínculos afetados.
+2. Leia cada CA como um caso a verificar. Confira condições, ação ou evento, resultado observável e origem. Procure interpretações que produziriam aceites diferentes, metas sem fonte, suposições tratadas como fatos e conflitos com restrições ou exclusões.
+3. Confira o blueprint exigido para a revisão do PRD. Verifique fontes do estado observado, fronteiras afetadas, critérios comuns da matriz ou justificativa para dispensá-la e avaliação da necessidade de ADR. Uma decisão proposta pode seguir para desenho se escopo, restrições e aceite estiverem claros.
+4. Quando houver TechSpec, confira solução, ADRs vigentes e verificações de cada CA. Procure consequências arquiteturais relevantes sem tratamento, decisões propostas apresentadas como aceitas e divergências materiais sem resolução.
+5. Quando houver tarefas, percorra `RF/RNF → CA → verificação → tarefa` nos dois sentidos. Confira IDs, cobertura, propósito das entregas, dependências, viabilidade das verificações e critérios de conclusão.
+6. Cite o ID ou trecho, a consequência para a etapa e a correção sugerida. Explique qual obrigação cada bloqueador impede. Registre melhorias e decisões previstas para etapas posteriores conforme o impacto. Faça a análise documental. Altere os artefatos analisados somente quando o pedido incluir correções.
+7. Salve `spec-review.md` com `PRONTO` ou `BLOQUEADO` **para a etapa avaliada**. Após correções autorizadas, repita as checagens afetadas.
 
 ## Saída e conclusão
 

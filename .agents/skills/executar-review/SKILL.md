@@ -14,7 +14,7 @@ No fluxo SDD, use `techspec.md`, `tasks.md` e os CA relevantes do `prd.md`. Para
 ## Procedimento
 
 1. Confirme a base do diff e preserve alterações preexistentes. Leia regras e skills pertinentes aos arquivos revisados; não carregue todas as regras por rotina.
-2. Procure problemas verificáveis de correção, regressão, segurança, contratos e limites arquiteturais. Diferencie defeito, divergência de especificação e preferência opcional.
+2. Procure problemas verificáveis de correção, regressão, segurança e contratos. Confira as fronteiras do blueprint e as decisões aceitas nos ADRs aplicáveis à mudança. Diferencie defeito, divergência de especificação e preferência opcional.
 3. Confira tarefas marcadas completas contra implementação, testes e evidências. Relacione cada achado a arquivo/linha, cenário, impacto e regra/CA/decisão pertinente.
 4. Execute checks obrigatórios e testes relevantes usando o projeto. Evidências anteriores só valem se ainda corresponderem ao código/configuração revisados.
 5. Se o pedido incluir correções, corrija dentro do escopo e revalide os caminhos afetados. Pedido restrito a revisão produz achados. Mudança material de escopo ou requisito segue a regra SDD.

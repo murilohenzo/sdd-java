@@ -38,7 +38,8 @@ Para cada comando, registre diretório, wrapper, perfis e pré-requisitos:
 - Etapas/checks adicionais exigidos pela equipe, se houver:
 - Decisões que precisam de aprovação específica, se houver, e onde essa exigência está definida:
 - Contratos, relatórios e evidências versionadas:
-- Blueprint/contextos/ADRs adotados: [links ou não adotados].
+- Blueprint macro e releases de contexto — [links, se adotados]. O blueprint de cada funcionalidade fica junto ao PRD.
+- ADRs — [diretório e convenção locais, incluindo critérios adicionais da equipe, se houver].
 
 ## Outras decisões locais
 

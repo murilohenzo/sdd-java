@@ -4,14 +4,15 @@
 - Revisão: [número]
 - Atualizado em: [AAAA-MM-DD]
 - PRD de origem: [prd.md](prd.md), revisão [número]
+- Base arquitetural — [blueprint.md](blueprint.md), matriz e ADRs aplicáveis. [Em PRD legado sem blueprint, indique as fontes consultadas.]
 
 ## Contexto confirmado
 
-[Arquivos consultados, módulos, versões efetivas, arquitetura observada, configuração e limitações. Diferencie estado atual de escolhas para greenfield.]
+[Referencie o blueprint e acrescente as evidências necessárias ao desenho, como módulos, versões efetivas, configuração e limitações.]
 
 ## Solução e decisões
 
-[Abordagem, responsabilidades, fluxo e justificativas. Referencie RF/RNF/CA; registre alternativas somente para decisões relevantes.]
+[Abordagem, responsabilidades e fluxo. Vincule RF/RNF/CA e justifique a escolha com a matriz ou o ADR correspondente, quando aplicável. Indique compromissos e mitigações que precisam aparecer nas verificações.]
 
 ## Componentes e arquivos
 

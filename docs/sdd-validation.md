@@ -84,9 +84,9 @@ Esperado: mensagem com tipo/escopo coerentes, marcador de quebra e footer com im
 
 ## 14. Descoberta de contexto na TechSpec
 
-Preparação: mudança de API com dois consumidores; perfil parcialmente desatualizado; projeto não adota releases de contexto.
+Preparação: mudança de API com dois consumidores, PRD legado sem blueprint, perfil parcialmente desatualizado e projeto sem releases de contexto.
 Pedido: “Crie a TechSpec desta mudança.”
-Esperado: investigar o fluxo e consumidores afetados, conferir os fatos relevantes e registrar o desenho na TechSpec. Não analisar serviços independentes nem criar release ou blueprint como efeito colateral.
+Esperado: investigar o fluxo e os consumidores afetados, conferir os fatos relevantes e registrar análise e desenho na TechSpec. A falta do blueprint legado permite seguir com as fontes disponíveis. A descoberta permanece limitada à mudança.
 
 ## 15. Atualização de contexto após implementação
 
@@ -108,9 +108,67 @@ Esperado: apontar os artefatos desatualizados e as evidências a refazer; não r
 
 ## 18. Perfil opcional ausente
 
-Preparação: kit documental recém-clonado, sem `.agents/project/profile.md` e sem aplicação Java.
+Preparação: kit copiado para um repositório recém-iniciado, sem `.agents/project/profile.md` nem aplicação Java.
 Pedido: “Valide a estrutura e avalie o fluxo.”
 Esperado: validar links existentes, reconhecer a ausência do perfil como normal até a adoção e não inventar versões, builds ou comandos de produto.
+
+## 19. PRD com trade-offs entre módulos
+
+- Preparação — catálogo e estoque compartilham uma integração comprovada. Para informar o estado da reserva ao catálogo, há duas opções compatíveis com o aceite, consultar o estoque sob demanda ou receber atualizações por um canal já disponível. O aceite admite atraso explícito na atualização.
+- Pedido — “Crie o PRD para reserva de estoque. Compare as opções que afetam os consumidores.”
+- Esperado — criar PRD e blueprint vinculados, citar os pontos de integração e comparar frescor, acoplamento e operação para as duas opções. Por exemplo, a consulta favorece frescor e introduz dependência em runtime, enquanto as atualizações evitam chamadas síncronas e exigem tratar atraso e reprocessamento. Indicar se cabe ADR e quais verificações levar à TechSpec.
+
+## 20. Nova funcionalidade com impacto localizado
+
+- Preparação — nova validação em um fluxo existente, sem mudar contrato público, fronteira ou dependência.
+- Pedido — “Crie o PRD para validar o limite previsto por esta regra de negócio.”
+- Esperado — criar PRD e blueprint breve com a evidência do fluxo e os motivos para dispensar matriz e novo ADR.
+
+## 21. Greenfield com decisão de desenho em aberto
+
+- Preparação — escopo, restrições e aceite claros em um checkout sem build. Há duas abordagens plausíveis e a escolha depende de uma evidência a colher no desenho.
+- Pedido — “Crie o PRD e valide a prontidão para desenho.”
+- Esperado — registrar a ausência de implementação, as opções como propostas e a evidência necessária. Liberar o PRD para desenho se os critérios dessa etapa estiverem atendidos. Manter o ADR em proposta ou aguardar a evidência requerida.
+
+## 22. Decisão duradoura e validação do desenho
+
+- Preparação — mudança de ownership de dados exige migração. A decisão autorizada está em ADR aceito e documenta uma exigência de compatibilidade.
+- Pedido — “Crie a TechSpec e valide se ela pode seguir para tarefas.”
+- Esperado — vincular o ADR e refletir migração, compatibilidade e verificações no desenho. Bloquear a liberação se o desenho divergir do ADR ou omitir uma consequência necessária.
+
+## 23. Revisão material invalida uma premissa
+
+- Preparação — a matriz recomendou uma opção sustentada por uma janela de indisponibilidade. O novo requisito elimina essa janela.
+- Pedido — “Atualize o PRD para exigir continuidade e diga o que muda no plano.”
+- Esperado — preservar os IDs válidos, revisar o blueprint e as alternativas, atualizar os links de revisão e apontar TechSpec, tarefas e evidências afetadas. Se um ADR aceito precisar mudar, manter seu histórico e vincular a proposta sucessora até que a decisão seja aceita.
+
+## 24. Tarefa localizada em uma especificação extensa
+
+- Preparação — a tarefa aponta para dois CA e uma seção da TechSpec. Há uma restrição transversal de autorização e outras tarefas em áreas independentes.
+- Pedido — “Retome a tarefa 2.0.”
+- Esperado — partir da tarefa e do registro de execução, localizar as verificações e incluir a restrição de autorização. Conferir mudanças na base e revalidar resultados afetados. Ampliar a leitura quando as referências forem insuficientes.
+
+## 25. Critério de aceite vago
+
+- Preparação — um requisito obrigatório define que a API deve responder “rapidamente” em carga de pico. As fontes disponíveis deixam em aberto a meta e o perfil de carga.
+- Pedido — “Valide se este PRD está pronto para desenho.”
+- Esperado — apontar o CA afetado, explicar por que o aceite permite interpretações diferentes e identificar a meta e o perfil de carga necessários. Registrar `BLOQUEADO` para desenho no relatório.
+
+## 26. Revisão em contexto novo
+
+- Preparação — PRD, blueprint, TechSpec e plano de uma API com concorrência. Uma obrigação material ficou apenas na conversa ou tem verificação insuficiente.
+- Pedido — “Valide em modo Elephant-Goldfish se a especificação está pronta para implementação.”
+- Esperado — fornecer ao revisor o alvo e as fontes pertinentes em um contexto novo. O agente principal confirma o achado e registra a consequência no relatório. Em ambiente sem isolamento, registrar a revisão independente como `NÃO EXECUTADO` e aplicar a validação local se a etapa permitir.
+
+O [piloto Spring Boot](../example/tasks/prd-reserva-estoque/spec-review.md) registra uma passagem real, as correções e o veredito após revalidar os trechos afetados.
+
+## Comparação entre versões do kit
+
+Para medir o efeito de uma revisão, rode os mesmos casos em sessões novas, com o mesmo modelo, configurações, pedido e revisão inicial do projeto. Use os resultados esperados de cada cenário para conferir os artefatos produzidos.
+
+- Qualidade — conte critérios de aceite ausentes ou ambíguos, vínculos sem cobertura, afirmações sem fonte e liberações indevidas da etapa.
+- Eficiência — registre tempo total, releituras sem evidência adicional, correções após iniciar a implementação e perguntas respondíveis pelas fontes. Quando disponíveis, some tokens de autor, revisor, consolidação e correções até o aceite.
+- Interpretação — compare os resultados por cenário. Considere uma redução de leitura vantajosa quando os requisitos, restrições transversais e verificações continuarem cobertos.
 
 ## Registro de validação desta revisão
 

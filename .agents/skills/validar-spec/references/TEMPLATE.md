@@ -3,6 +3,7 @@
 - Data: [AAAA-MM-DD]
 - Etapa avaliada: [desenho | planejamento de tarefas | implementação]
 - Artefatos e revisões: [documentos lidos]
+- Modo — [local | Elephant-Goldfish]. [Se a revisão independente foi solicitada, indique o isolamento, o escopo e o resultado da execução.]
 - Veredito: [PRONTO | BLOQUEADO] para [etapa]
 
 ## Achados
@@ -14,6 +15,10 @@
 ## Cobertura e consistência
 
 [Requisitos sem aceite, CA sem verificação, verificações sem tarefa, IDs inválidos, dependências ausentes/cíclicas e conflitos de revisão. Informe o que foi efetivamente conferido.]
+
+## Coerência arquitetural
+
+[Revisão analisada pelo blueprint, fontes, qualidade da comparação ou motivo para dispensar a matriz, ADRs aplicáveis e aderência do desenho. Diferencie lacunas que afetam a etapa de decisões programadas para uma etapa posterior.]
 
 ## Decisões e próximos passos
 

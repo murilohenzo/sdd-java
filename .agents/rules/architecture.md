@@ -32,4 +32,4 @@ Não existe uma estrutura universal para projetos Spring Boot. Antes de mover ou
 - Código compartilhado deve ter ownership, estabilidade e motivo de compartilhamento definidos.
 - Mudanças de arquitetura exigem atualização da documentação e, quando configurado, dos testes ArchUnit.
 
-Use a skill [archunit-rules](../skills/archunit-rules/SKILL.md) somente quando a tarefa envolver validação arquitetural automatizada.
+Use [avaliar-arquitetura](../skills/avaliar-arquitetura/SKILL.md) para comparar alternativas e identificar decisões que mereçam ADR. Para validação automatizada de fronteiras e dependências, use [archunit-rules](../skills/archunit-rules/SKILL.md).

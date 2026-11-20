@@ -3,7 +3,7 @@
 - Estado: [pendente | em_andamento | bloqueada | concluida]
 - Depende de: [IDs ou nenhuma]
 - Base: PRD revisão [número]; TechSpec revisão [número]
-- Critérios relacionados: [CA-*; ou tarefa habilitada e justificativa]
+- Critérios relacionados — [PRD](prd.md), [CA-* ou tarefa habilitada e justificativa].
 
 ## Entrega e limites
 
@@ -11,7 +11,7 @@
 
 ## Referências de implementação
 
-- [Seção da TechSpec](techspec.md): [decisões pertinentes].
+- [TechSpec](techspec.md) — [seção, decisão/ADR e IDs de verificação pertinentes].
 - Arquivos: [caminhos existentes/propostos e propósito].
 - Regras/skills: [apenas as aplicáveis].
 
@@ -22,8 +22,8 @@
 
 ## Verificações exigidas
 
-- [ ] [ID da TechSpec] — [cenário e resultado esperado].
-  - Comando/procedimento e diretório: [como verificar].
+- [ ] [ID da verificação na TechSpec] — [variação específica da tarefa, se houver].
+  - Execução prevista — [referência ao comando/procedimento na TechSpec ou adaptação necessária nesta tarefa].
   - Estado da execução: NÃO EXECUTADO.
   - Evidência: [preencher após executar].
 
@@ -39,4 +39,4 @@
 - Alterações realizadas: [resumo].
 - Validações: [comando, diretório, resultado real e evidência].
 - Recursos iniciados/encerrados: [se houver].
-- Bloqueio e próximo passo: [se houver].
+- Bloqueio e próximo passo — [trecho afetado, condição para destravar e ação concreta, se houver].

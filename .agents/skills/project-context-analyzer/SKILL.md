@@ -7,7 +7,7 @@ description: Analisa projetos por evidências de código, build, configuração 
 
 ## Objetivo
 
-Produza um contexto arquitetural verificável. Aplique [project-analysis.md](../../rules/project-analysis.md) para delimitar a pergunta, o escopo e o destino do resultado. Reuse contexto já validado; descoberta local simples não exige este diagnóstico amplo.
+Produza um contexto arquitetural verificável. Aplique [project-analysis.md](../../rules/project-analysis.md) para delimitar a pergunta, o escopo e o destino do resultado. Para o blueprint de um PRD, siga o modo funcionalidade de [architecture-blueprint-generator](../architecture-blueprint-generator/SKILL.md). Reuse contexto já validado.
 
 Os caminhos abaixo são padrões somente quando o respectivo artefato for solicitado ou adotado; produzir um deles não exige produzir o outro:
 
@@ -24,7 +24,7 @@ Use esta skill quando o pedido envolver:
 - criação ou atualização de `docs/context`;
 - diagnóstico de arquitetura, acoplamento, coesão, comunicação ou ownership;
 - documentação para onboarding ou planejamento de melhorias;
-- atualização do blueprint após alterações em contratos, portas, eventos, bancos, infraestrutura ou deployment;
+- atualização do blueprint macro após alterações em contratos, portas, eventos, bancos, infraestrutura ou deployment;
 - análise de projeto greenfield ou brownfield.
 
 Não use para uma revisão isolada de código, teste ou contrato quando não houver necessidade de registrar contexto e visão arquitetural. Nesses casos, encaminhe para a skill específica.
@@ -52,7 +52,7 @@ Consulte [analysis-workflow.md](references/analysis-workflow.md) quando precisar
 5. Analise direção de dependências, fronteiras, coesão, acoplamento, riscos e divergências entre o planejado e o implementado.
 6. Classifique cada afirmação como `observado`, `inferido`, `não confirmado` ou `recomendado`. Recomendações não devem ser descritas como comportamento existente.
 7. Escolha o destino pela regra de análise. Crie a próxima release somente se o registro versionado de contexto tiver sido solicitado ou adotado e houver diagnóstico novo relevante; preserve histórico. Atualizar perfil, TechSpec ou resposta não exige release.
-8. Crie o blueprint quando solicitado ou exigido pela convenção local; atualize um existente somente quando o escopo o afetar. Preserve informações válidas.
+8. Crie o blueprint macro quando solicitado ou exigido pela convenção local e atualize-o quando o escopo o afetar. Preserve informações válidas.
 9. Valide links, caminhos, nomes de módulos, portas, contratos e diagramas. Execute testes/build somente quando forem seguros e relevantes; registre comandos e limitações.
 10. Encerre ao responder a pergunta e delimitar impactos e pendências. Confira somente o template do artefato produzido, quando houver; não crie entregáveis adicionais para satisfazer um checklist.
 

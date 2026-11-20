@@ -13,9 +13,10 @@ Este arquivo é o ponto de entrada. Use o perfil para fatos locais, rules para r
 
 Para trabalho orientado por especificação, leia [spec-driven-development.md](.agents/rules/spec-driven-development.md). Os artefatos ficam em `tasks/prd-<slug>/`; não carregue outras funcionalidades sem necessidade.
 
-Em uma entrega SDD completa, siga PRD → TechSpec → tarefas → checagem de consistência → implementação → review → QA → reconciliação final com o PRD. Se a checagem ou a validação revelar uma lacuna, atualize a fonte correta, retome o trabalho afetado e revalide; não declare a funcionalidade concluída por haver documentos ou tarefas marcadas.
+Em uma entrega SDD completa, siga PRD com blueprint da funcionalidade → TechSpec → tarefas → checagem de consistência → implementação → review → QA → reconciliação com o PRD. Se encontrar uma lacuna, atualize a fonte correta, retome o trabalho afetado e revalide.
 
-- Problema, escopo e critérios de aceitação: [criar-prd](.agents/skills/criar-prd/SKILL.md).
+- Problema, escopo, critérios de aceitação e contexto arquitetural: [criar-prd](.agents/skills/criar-prd/SKILL.md).
+- Matriz de impacto e trade-offs e decisão sobre ADR: [avaliar-arquitetura](.agents/skills/avaliar-arquitetura/SKILL.md).
 - Solução técnica derivada do PRD: [criar-techspec](.agents/skills/criar-techspec/SKILL.md).
 - Entregas e dependências derivadas da TechSpec: [criar-tasks](.agents/skills/criar-tasks/SKILL.md).
 - Ambiguidades, lacunas e rastreabilidade: [validar-spec](.agents/skills/validar-spec/SKILL.md).
@@ -33,7 +34,7 @@ Execute somente as etapas abrangidas pelo pedido. Uma correção pequena ou edi�
 - Código/configuração Spring: [spring-boot-conventions](.agents/skills/spring-boot-conventions/SKILL.md).
 - Testes: [tests.md](.agents/rules/tests.md), com [java-junit](.agents/skills/java-junit/SKILL.md) para Java puro ou [springboot-test](.agents/skills/springboot-test/SKILL.md) quando depender de Spring/infraestrutura.
 - Contratos OpenAPI e geração: [openapi-contract-first](.agents/skills/openapi-contract-first/SKILL.md).
-- Descoberta de contexto ou impacto entre módulos: [project-analysis.md](.agents/rules/project-analysis.md); a regra delimita a análise e indica quando carregar skills de diagnóstico ou blueprint.
+- Descoberta de contexto ou impacto entre módulos: [project-analysis.md](.agents/rules/project-analysis.md) delimita a análise. [architecture-blueprint-generator](.agents/skills/architecture-blueprint-generator/SKILL.md) mantém o blueprint da funcionalidade ou o mapa macro.
 - Execução de comandos, serviços e evidências: [execution.md](.agents/rules/execution.md).
 
 Referências e exemplos são consultados sob demanda. Os arquivos em `.agents/rules/` são documentos locais explicitamente roteados por este guia, não uma configuração de carregamento automático. Templates não instituem arquitetura nem dependências.

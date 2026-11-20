@@ -4,6 +4,7 @@
 - Revisão: [número]
 - Atualizado em: [AAAA-MM-DD]
 - Origem: [pedido e fontes do produto; distinguir decisões de propostas]
+- Blueprint da funcionalidade — [blueprint.md](blueprint.md).
 
 ## Problema e resultado esperado
 
@@ -24,10 +25,10 @@
 
 ## Critérios de aceitação
 
-- CA-01 — RF-01: Dado [contexto], quando [ação], então [resultado verificável].
-- CA-02 — [RF/RNF]: [erro, limite ou restrição observável relevante].
+- CA-01 — RF-01: Dado [ator, estado inicial e dados relevantes], quando [ação ou evento], então [resposta ou efeito esperado, observável].
+- CA-02 — [RF/RNF]: Dado [condição de falha, limite ou restrição], quando [ação ou evento], então [resultado esperado e efeito que deve ser evitado, quando relevante].
 
-[Cada obrigação do escopo deve ter aceite. Preserve IDs existentes.]
+[Separe resultados que possam falhar independentemente, preservando cenários em que a combinação de efeitos é parte do aceite. Substitua termos como “rápido” ou “adequado” por condições verificáveis com fonte. Registre como pendência qualquer limiar que ainda dependa de decisão. Preserve IDs existentes.]
 
 ## Experiência e restrições
 
@@ -37,6 +38,10 @@
 
 - [Premissa reversível e impacto se incorreta.]
 - [Pendência material, decisão necessária e etapa afetada; ou nenhuma.]
+
+## Impactos da análise arquitetural
+
+[Registre efeitos confirmados sobre escopo, restrições ou aceite, referenciando RF/RNF/CA. As alternativas, riscos técnicos e ADRs ficam vinculados no blueprint. Remova esta seção se a análise não mudar o PRD.]
 
 ## Alterações desta revisão
 

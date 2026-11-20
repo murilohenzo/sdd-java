@@ -13,7 +13,7 @@ Use [o template do índice](references/TEMPLATE_TASKS.md) e [o template de taref
 
 ## Procedimento
 
-1. Inventarie RF/RNF, CA, decisões e casos de verificação. Identifique lacunas antes de converter um documento incompleto em tarefas aparentemente executáveis.
+1. Inventarie RF/RNF, CA, decisões e verificações da TechSpec. Incorpore ao plano os compromissos arquiteturais pertinentes, como compatibilidade, migração e mitigação, usando referências aos ADRs quando houver. Resolva lacunas antes de liberar entregas dependentes.
 2. Organize entregas pequenas e verificáveis, preferencialmente por comportamento completo. Separe infraestrutura habilitadora quando necessária e indique a entrega que ela viabiliza. Não imponha um número fixo de tarefas.
 3. Declare dependências por ID, valide sua existência e ausência de ciclos. A ordem deve permitir testar cada incremento. Independência pode ser registrada, mas não pressupõe execução paralela ou subagentes.
 4. Grave `tasks.md` e `task_<n>.md`, com números estáveis. Inclua escopo, subtarefas, referências técnicas, testes, comandos e critérios de conclusão. Não replique contratos ou toda a TechSpec.
