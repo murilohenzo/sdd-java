@@ -7,8 +7,10 @@ O [exemplo Spring Boot](example/README.md) acompanha uma API greenfield de reser
 - [Execute o exemplo](#execute-o-exemplo)
 - [Conduza o fluxo SDD](#conduza-o-fluxo-sdd)
 - [Use Elephant-Goldfish](#use-elephant-goldfish)
+- [Skills sob demanda](#skills-sob-demanda)
 - [Adote o kit em outro projeto](#adote-o-kit-em-outro-projeto)
-- [Valide e versione a entrega](#valide-e-versione-a-entrega)
+- [Valide a entrega](#valide-a-entrega)
+- [Licença](#licença)
 
 ## Execute o exemplo
 
@@ -24,11 +26,31 @@ Para ler a entrega na ordem em que foi construída, siga o [percurso do exemplo]
 
 ## Conduza o fluxo SDD
 
-`PRD + blueprint → TechSpec → tarefas → validação da especificação → implementação → review → QA → reconciliação com o PRD`
+O fluxograma mostra uma entrega completa. Use o caminho e as etapas autorizadas no pedido. [Contrato SDD](.agents/rules/spec-driven-development.md)
+
+```mermaid
+flowchart TD
+    Pedido(["Pedido e escopo"]) --> PRD["PRD e blueprint da funcionalidade"]
+    PRD --> TechSpec["TechSpec"]
+    TechSpec --> Tarefas["Plano de tarefas"]
+    Tarefas --> Validar["Validação local ou Elephant-Goldfish"]
+    Validar --> Pronto{"Especificação pronta?"}
+    Pronto -->|Não| CorrigirSpecs["Ajustar os artefatos afetados"]
+    CorrigirSpecs --> Validar
+    Pronto -->|Sim| Implementar["Implementação por tarefa"]
+    Implementar --> Review["Review de código"]
+    Review -->|Ajuste no código| Implementar
+    Review -->|Aprovado| QA["QA dos critérios de aceite"]
+    QA --> Reconciliar{"PRD, tarefas e evidências reconciliados?"}
+    Reconciliar -->|Sim| Aceite(["Entrega validada"])
+    Reconciliar -->|Evidência pendente| QA
+    Reconciliar -->|Comportamento a corrigir| Implementar
+    Reconciliar -->|Requisito ou desenho a rever| CorrigirSpecs
+```
 
 1. **Defina o comportamento.** Registre o problema, o escopo, os RF/RNF e critérios de aceite observáveis. Crie o blueprint junto ao PRD e revise-o quando a mudança for material. Descreva fronteiras e consumidores, compare ganhos e perdas das alternativas relevantes e avalie um ADR para decisões duradouras. Em greenfield, registre lacunas de implementação e premissas. Em um sistema existente, confirme o fluxo e os contratos nas fontes. [Criar PRD](.agents/skills/criar-prd/SKILL.md) · [Gerar blueprint](.agents/skills/architecture-blueprint-generator/SKILL.md) · [Avaliar arquitetura](.agents/skills/avaliar-arquitetura/SKILL.md)
 2. **Desenhe e planeje.** Transforme requisitos e decisões em componentes, contratos e verificações na TechSpec. Divida a entrega em tarefas com dependências, critérios de conclusão e IDs estáveis. [Criar TechSpec](.agents/skills/criar-techspec/SKILL.md) · [Criar tarefas](.agents/skills/criar-tasks/SKILL.md)
-3. **Verifique a prontidão.** Confira se a especificação permite implementar e testar cada obrigação. Resolva as lacunas que bloqueiam a etapa. Use revisão independente para o escopo de maior impacto. [Validar especificação](.agents/skills/validar-spec/SKILL.md)
+3. **Verifique a prontidão.** Confira se a especificação permite implementar e testar cada obrigação. Resolva as lacunas que bloqueiam a etapa. Em mudanças de maior impacto, use revisão independente quando solicitada ou autorizada por convenção local. [Validar especificação](.agents/skills/validar-spec/SKILL.md)
 4. **Implemente e confirme o aceite.** Parta de `tasks.md` e siga os critérios e decisões da tarefa, incluindo as restrições transversais. Faça review de código, valide o comportamento em QA e percorra `RF/RNF → CA → verificação → tarefa → evidência`. Ao detectar uma divergência, corrija na fonte e revalide os vínculos afetados. [Executar tarefa](.agents/skills/executar-task/SKILL.md) · [Revisar código](.agents/skills/executar-review/SKILL.md) · [Executar QA](.agents/skills/executar-qa/SKILL.md)
 
 Indique ao agente a funcionalidade pelo caminho ou slug e diga até qual etapa ele pode avançar. Por exemplo, “Crie o PRD e o blueprint de reserva de estoque” delimita a descoberta. “Retome a tarefa 2.0 do PRD informado” começa pelo estado da entrega. O contrato SDD define quando cada artefato está `pronto` e o que permite encerrar a funcionalidade. [Contrato SDD](.agents/rules/spec-driven-development.md)
@@ -48,7 +70,12 @@ tasks/prd-<slug>/
   evidences/         evidências avulsas quando necessárias
 ```
 
-Código, build e configuração comprovam o estado atual. O PRD descreve o comportamento esperado e a TechSpec define o desenho. Registre ADRs na convenção do projeto ou em `docs/architecture/adr/`. Mantenha o blueprint macro e releases de contexto quando solicitados ou adotados no projeto. [Análise de contexto](.agents/rules/project-analysis.md)
+Código, build e configuração comprovam o estado atual. O PRD descreve o comportamento esperado e a TechSpec define o desenho. Registre ADRs na convenção do projeto ou em `docs/architecture/adr/`. [Análise de contexto](.agents/rules/project-analysis.md)
+
+### Blueprint por funcionalidade e blueprint macro
+
+- **Funcionalidade** — ao criar ou revisar materialmente um PRD, escreva `tasks/prd-<slug>/blueprint.md` para mapear o impacto no fluxo, nas fronteiras e nos consumidores. Use os trechos pertinentes do mapa macro quando ele existir. [Gerar blueprint da funcionalidade](.agents/skills/architecture-blueprint-generator/SKILL.md)
+- **Macro** — crie ou atualize o mapa do projeto ou módulo por pedido explícito ou quando a mudança afetar um blueprint macro adotado localmente. O caminho padrão é `docs/architecture/Project_Architecture_Blueprint.md`. [Procedimento macro](.agents/skills/architecture-blueprint-generator/references/macro-workflow.md)
 
 ## Use Elephant-Goldfish
 
@@ -66,6 +93,23 @@ O modo usa a delegação em contexto novo do ambiente. Se ela estiver indisponí
 
 **O que o piloto demonstrou.** O revisor identificou três lacunas materiais e uma ambiguidade no formato da quantidade antes do código. Uma delas era a prova do saldo exato. Confirmar uma reserva final de quatro unidades provava apenas que havia pelo menos quatro. O plano passou a exigir a rejeição de cinco seguida da confirmação de quatro. Ganhos de tempo, retrabalho e tokens ainda precisam de comparação controlada. A revisão posterior do código levou à adoção do perfil hexagonal, hoje verificado no build. [Relatório do piloto](example/tasks/prd-reserva-estoque/spec-review.md) · [Como avaliar](example/README.md#avalie-a-revisão-independente)
 
+## Skills sob demanda
+
+### Por pedido explícito
+
+- **`criar-commit`** prepara a mensagem ou cria um commit local no padrão Conventional Commits quando solicitado. Use `--dry-run` para simular com o conteúdo staged ou `--files` para delimitar a seleção. [Skill de commit](.agents/skills/criar-commit/SKILL.md)
+- **`caveman`** aplica estilo telegráfico quando você pede esse modo pelo nome. Preserva a redação necessária para especificações, contratos e evidências. [Skill de estilo](.agents/skills/caveman/SKILL.md)
+
+### Conforme o escopo
+
+Carregue estas skills quando a atividade correspondente fizer parte do pedido ou da etapa em execução.
+
+- **Diagnóstico de projeto** — use `project-context-analyzer` para onboarding ou análise entre módulos. Gere release de contexto quando esse registro for solicitado ou adotado. [Analisar contexto](.agents/skills/project-context-analyzer/SKILL.md)
+- **Código Spring Boot** — use `spring-boot-conventions` para APIs, beans, configuração e integrações conforme as versões do módulo. [Convenções Spring Boot](.agents/skills/spring-boot-conventions/SKILL.md)
+- **Testes** — use `java-junit` para lógica Java isolada e `springboot-test` quando o comportamento depender do Spring ou de infraestrutura. [JUnit](.agents/skills/java-junit/SKILL.md) · [Testes Spring Boot](.agents/skills/springboot-test/SKILL.md)
+- **Contratos OpenAPI** — use `openapi-contract-first` para evoluir um contrato OpenAPI versionado e sua geração de código. [Contrato OpenAPI](.agents/skills/openapi-contract-first/SKILL.md)
+- **Verificação arquitetural automatizada** — use `archunit-rules` para verificar fronteiras e dependências previstas na arquitetura adotada. [Regras ArchUnit](.agents/skills/archunit-rules/SKILL.md)
+
 ## Adote o kit em outro projeto
 
 1. Integre o [AGENTS.md](AGENTS.md) às instruções do repositório de destino. Preserve as convenções e instruções dos módulos.
@@ -73,7 +117,7 @@ O modo usa a delegação em contexto novo do ambiente. Se ela estiver indisponí
 3. Preencha `.agents/project/profile.md` com os módulos, versões, arquitetura, contratos e comandos confirmados no destino. Registre critérios locais de revisão independente se a equipe os adotar. [Modelo de perfil](.agents/project/profile.example.md)
 4. Comece por uma funcionalidade pequena e compare o resultado com o [exemplo](example/README.md) e os [cenários de avaliação](docs/sdd-validation.md).
 
-## Valide e versione a entrega
+## Valide a entrega
 
 Com Python 3.10 ou superior, execute na raiz:
 
@@ -84,4 +128,6 @@ python -m unittest discover -s scripts/tests -v
 
 Esses checks cobrem metadados das skills e links locais do kit. Para verificar a API, rode a suíte Maven do exemplo. Para avaliar o comportamento da LLM, compare achados válidos, falsos positivos, tempo e tokens totais usando os mesmos artefatos de entrada. [Roteiro de avaliação](docs/sdd-validation.md#comparação-entre-versões-do-kit)
 
-Quando a entrega estiver validada, use [criar-commit](.agents/skills/criar-commit/SKILL.md) para preparar ou registrar um Conventional Commit. A simulação `Use criar-commit --dry-run` parte do conteúdo staged. Use `--files` para delimitar a seleção quando necessário.
+## Licença
+
+Este repositório é distribuído sob a **Apache License 2.0** (`Apache-2.0`). [Leia o arquivo LICENSE](LICENSE)
