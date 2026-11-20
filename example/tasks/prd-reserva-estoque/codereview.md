@@ -1,16 +1,17 @@
 # Revisão de código — Reserva de estoque
 
 - Data — 2026-11-20.
-- Base — implementação greenfield em `example/` no estado local de 2026-11-20.
-- Referências — [PRD 2](prd.md), [TechSpec 2](techspec.md), [plano 2](tasks.md) e [ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md).
+- Base — commit `7cbc5ae` (revisão 2) e alterações da tarefa 3.0 em `example/`.
+- Referências — [PRD 2](prd.md), [TechSpec 3](techspec.md), [plano 3](tasks.md), [ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md) e [ADR 0002](../../docs/architecture/adr/0002-ports-and-adapters.md).
 - Veredito — **APROVADO**.
 
-## Achados e conformidade
+## Achados corrigidos
 
-Nenhum defeito bloqueador identificado. A [borda HTTP](../../src/main/java/br/example/reservation/ReservationController.java) valida os tipos JSON e a chave antes de chamar o serviço. Ela traduz rejeições pelos códigos declarados. O [serviço](../../src/main/java/br/example/reservation/ReservationService.java) verifica primeiro a confirmação anterior e só grava a chave no fluxo que debita saldo. Um único bloqueio protege as duas estruturas de estado. A [configuração](../../src/main/resources/application.properties) usa loopback, conforme o ADR.
+- **Fronteiras hexagonais.** A revisão 2 tinha um bean Spring que detinha as regras de negócio e um controller acoplado aos tipos da implementação. A revisão 3 usa uma porta de entrada e compõe as dependências em infraestrutura. O DTO HTTP pertence ao adaptador. [Caso de uso](../../src/main/java/br/example/reservation/core/application/ReserveStockService.java) · [Controller](../../src/main/java/br/example/reservation/adapters/inbound/http/ReservationController.java) · [Composição](../../src/main/java/br/example/reservation/infrastructure/ReservationConfiguration.java)
+- **Responsabilidade única.** Na revisão 2, alterações de regra, mecanismo de armazenamento, sincronização ou carga inicial afetavam o serviço. Na revisão 3, saldo e idempotência ficam juntos no agregado porque compartilham uma invariante. A sincronização pertence ao adaptador. A carga inicial pertence à composição. Na borda, a validação da requisição e a tradução de erros têm componentes próprios. [Agregado](../../src/main/java/br/example/reservation/core/domain/ReservationLedger.java) · [Adaptador em memória](../../src/main/java/br/example/reservation/adapters/outbound/memory/InMemoryReservationStore.java) · [Validação HTTP](../../src/main/java/br/example/reservation/adapters/inbound/http/ReservationHttpRequest.java) · [Erros HTTP](../../src/main/java/br/example/reservation/adapters/inbound/http/ReservationHttpErrors.java)
 
 ## Validação
 
-`mvn -B -ntp verify` em `example/` passou com Java 21.0.12, Maven 3.9.16 e Spring Boot 3.5.10. Foram 25 testes sem falha, erro ou skip. O JAR foi empacotado e validado conforme [MAN-01](qa.md#man-01--escuta-local-e-reinício).
+`mvn -B -ntp -o verify` em `example/` passou com 32 testes, incluindo seis checks do ArchUnit 1.5.1. Uma classe compilada temporariamente no domínio com `@Service` produziu a falha de arquitetura esperada. Após removê-la, todos os checks passaram. [Regras compiladas](../../src/test/java/br/example/reservation/ArchitectureRulesTest.java) · [QA e MAN-01](qa.md)
 
-O escopo aprovado é o processo local com estado descartável definido pelo PRD. A validação HTTP usou loopback em portas dinâmicas.
+O escopo aprovado é o processo local com estado descartável. Os checks cobrem dependências e localização. A análise de responsabilidade única foi feita por inspeção das causas de mudança. A revisão 2 registrava o aceite funcional antes de o perfil hexagonal ser adotado.

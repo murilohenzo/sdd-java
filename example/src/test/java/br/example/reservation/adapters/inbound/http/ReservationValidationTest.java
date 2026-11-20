@@ -1,7 +1,8 @@
-package br.example.reservation;
+package br.example.reservation.adapters.inbound.http;
 
 import java.util.stream.Stream;
 
+import br.example.reservation.core.application.port.inbound.ReserveStock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,7 +29,7 @@ class ReservationValidationTest {
     private MockMvc mvc;
 
     @MockitoBean
-    private ReservationService service;
+    private ReserveStock reserveStock;
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidRequests")
@@ -43,7 +44,7 @@ class ReservationValidationTest {
         mvc.perform(request)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
-        verifyNoInteractions(service);
+        verifyNoInteractions(reserveStock);
     }
 
     private static Stream<Arguments> invalidRequests() {

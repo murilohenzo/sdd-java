@@ -1,20 +1,20 @@
 # QA — Reserva de estoque
 
 - Data — 2026-11-20.
-- Base — implementação greenfield em `example/`, Java 21.0.12, Maven 3.9.16 e Spring Boot 3.5.10.
-- Referências — [PRD 2](prd.md), [TechSpec 2](techspec.md), [plano 2](tasks.md) e [ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md).
+- Base — implementação da tarefa 3.0 em `example/`, Java 21.0.12, Maven 3.9.16 e Spring Boot 3.5.10.
+- Referências — [PRD 2](prd.md), [TechSpec 3](techspec.md), [plano 3](tasks.md), [ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md) e [ADR 0002](../../docs/architecture/adr/0002-ports-and-adapters.md).
 - Veredito — **APROVADO**.
 
 ## Aceite verificado
 
-Comando da suíte — `mvn -B -ntp verify` no diretório `example/`. Maven concluiu com `BUILD SUCCESS` e 25 testes, zero falhas, erros ou skips. O Surefire registrou oito casos no [serviço](../../src/test/java/br/example/reservation/ReservationServiceTest.java), dezesseis no [slice MVC](../../src/test/java/br/example/reservation/ReservationValidationTest.java) e uma jornada [HTTP em porta aleatória](../../src/test/java/br/example/reservation/ReservationHttpTest.java). Os relatórios são gerados em `example/target/surefire-reports/`.
+Comando da suíte — `mvn -B -ntp -o verify` no diretório `example/`. Maven concluiu com `BUILD SUCCESS` e 32 testes, zero falhas, erros ou skips. O Surefire registrou nove casos no [caso de uso e adaptador em memória](../../src/test/java/br/example/reservation/ReserveStockServiceTest.java), dezesseis no [slice MVC](../../src/test/java/br/example/reservation/adapters/inbound/http/ReservationValidationTest.java), uma jornada [HTTP em porta aleatória](../../src/test/java/br/example/reservation/ReservationHttpTest.java) e seis regras [ArchUnit](../../src/test/java/br/example/reservation/ArchitectureRulesTest.java). Os relatórios são gerados em `example/target/surefire-reports/`.
 
 | Requisito e aceite | Verificação → tarefa | Resultado observado |
 | --- | --- | --- |
 | RF-01 / CA-01 | TC-01, TU-01 → 1.0 | **PASSOU** · 201 com UUID e seis unidades. A rejeição de cinco seguida da confirmação de quatro prova o saldo exato. |
 | RF-02 / CA-02 | TC-01, TU-01 → 1.0 | **PASSOU** · 200 devolveu a confirmação original. A fixture de replay manteve o saldo em quatro. |
 | RF-02 / CA-03 | TC-01, TU-01 → 1.0 | **PASSOU** · mudanças isoladas de SKU e quantidade retornaram 409 `KEY_REUSED`. Replay posterior manteve a reserva, e o saldo continuou em quatro. |
-| RF-03 / CA-04 | TC-02, TC-03, TC-04, TU-02 → 1.0 | **PASSOU** · 400 `INVALID_REQUEST` sem chamar o serviço, 404 `SKU_NOT_FOUND` e 409 `INSUFFICIENT_STOCK`. Cada rejeição de domínio preservou as dez unidades em fixture própria. |
+| RF-03 / CA-04 | TC-02, TC-03, TC-04, TU-02 → 1.0 | **PASSOU** · 400 `INVALID_REQUEST` sem chamar a porta de entrada, 404 `SKU_NOT_FOUND` e 409 `INSUFFICIENT_STOCK`. Cada rejeição de domínio preservou as dez unidades em fixture própria. |
 | RNF-01 / CA-05 | TU-04, TU-05 → 2.0 | **PASSOU** · duas chaves disputando seis unidades geraram uma confirmação e uma rejeição. Com a mesma chave houve uma confirmação e um replay idêntico. Ambas as disputas deixaram quatro unidades. |
 | RNF-02 / CA-06 | MAN-01 → 1.0 | **PASSOU** · escuta em loopback nas duas inicializações. A mesma chave confirmou dez unidades novamente com novo UUID após reiniciar. |
 
@@ -24,8 +24,12 @@ Comando da suíte — `mvn -B -ntp verify` no diretório `example/`. Maven concl
 2. Envie `POST /reservations` em `127.0.0.1`, com `Idempotency-Key: restart-proof` e `{"sku":"DEMO-1","quantity":10}`. Espere 201. Repita para obter 200 com o mesmo corpo. Peça uma unidade com outra chave e espere 409 `INSUFFICIENT_STOCK`.
 3. Encerre a aplicação, inicie novamente e repita as chamadas. Espere a mesma sequência de status e um novo identificador de confirmação.
 
-Execução observada — o PID 35328 escutou em `127.0.0.1:53915` e retornou 201/200/409, com id `c4da2c57-d305-4e92-a10c-0e198e78ed93`. Após encerrar, o PID 25636 escutou em `127.0.0.1:53919` e retornou 201/200/409, com id `b07d9930-03dd-4891-bee3-133e6e1f03e9`. Os dois processos eram da verificação e foram encerrados. SHA-256 do JAR usado — `3141dc3e95d2df340e338680c94cb9315f69f9c4ca3d3c3a18f71b73d9bae9ff`.
+Execução observada — o PID 28736 escutou em `127.0.0.1:53852` e retornou 201/200/409, com id `9d7740d6-ec59-4261-9774-3205c852884f`. Após encerrar, o PID 28832 escutou em `127.0.0.1:53856` e retornou 201/200/409, com id `c04b8266-b2e0-4d1d-a29f-c6875e2eea9e`. Os dois processos eram da verificação e foram encerrados. SHA-256 do JAR usado — `ff8ab4f2c451c1cdffe3f621cfbeff7a6669b609de4891bae9fae08e50807a96`.
+
+## Verificação arquitetural
+
+ARQ-01 passou na [tarefa 3.0](task_3.md). O teste negativo isolado compilou em `target/classes` uma classe temporária de domínio anotada com `@Service` e confirmou a falha esperada em `ArchitectureRulesTest`. Após a remoção da sonda, o build passou e empacotou o JAR validado em MAN-01.
 
 ## Fechamento
 
-Todos os seis CA da revisão 2 estão ligados a verificações, tarefas concluídas e evidência real. A execução inicial no sandbox teve bloqueio de loopback e foi refeita com autorização para conexões locais. O empacotamento completo ocorreu após baixar dependências do plugin Maven. O [review de código](codereview.md) aprovou a implementação no escopo de uma instância local. Os achados [Elephant-Goldfish](spec-review.md) foram convertidos em verificações antes do código e estão cobertos nos resultados acima.
+Todos os seis CA do PRD 2 foram revalidados no desenho hexagonal da TechSpec 3. A suíte e o JAR usaram portas locais dinâmicas. O [review de código](codereview.md) aprovou também as fronteiras e a separação das responsabilidades. Os achados [Elephant-Goldfish](spec-review.md) do piloto inicial continuam cobertos no aceite.

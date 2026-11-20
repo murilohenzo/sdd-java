@@ -7,7 +7,7 @@
 
 ## Decisão
 
-Manter saldo e chaves confirmadas na mesma instância do serviço. Serializar a verificação da chave, a leitura do saldo e a gravação de uma confirmação em uma seção crítica. Usar um processo com configuração HTTP local.
+Manter saldo e chaves confirmadas na mesma instância de armazenamento. Serializar a verificação da chave, a leitura do saldo e a gravação de uma confirmação em uma seção crítica. Usar um processo com configuração HTTP local. Desde a revisão 3, a sincronização pertence ao adaptador em memória e o agregado de domínio decide a reserva. [ADR 0002](0002-ports-and-adapters.md)
 
 ## Consequências e verificação
 

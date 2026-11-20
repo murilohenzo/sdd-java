@@ -7,23 +7,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import br.example.reservation.adapters.outbound.memory.InMemoryReservationStore;
+import br.example.reservation.core.application.ReserveStockService;
+import br.example.reservation.core.application.port.inbound.ReserveStock;
+import br.example.reservation.core.domain.Reservation;
+import br.example.reservation.core.domain.ReservationConfirmation;
+import br.example.reservation.core.domain.ReservationLedger;
+import br.example.reservation.core.domain.ReservationRejected;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static br.example.reservation.ReservationService.RejectionReason.INSUFFICIENT_STOCK;
-import static br.example.reservation.ReservationService.RejectionReason.KEY_REUSED;
+import static br.example.reservation.core.domain.ReservationRejected.Reason.INSUFFICIENT_STOCK;
+import static br.example.reservation.core.domain.ReservationRejected.Reason.KEY_REUSED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ReservationServiceTest {
+class ReserveStockServiceTest {
 
     private static final String SKU = "DEMO-1";
-    private final ReservationService service = new ReservationService();
+    private final ReserveStock service = new ReserveStockService(
+            new InMemoryReservationStore(new ReservationLedger(SKU, 10)));
 
     @Test
     void firstConfirmationDebitsExactlySix() {
-        ReservationService.Confirmation confirmation = service.reserve("first", SKU, 6);
+        ReservationConfirmation confirmation = service.reserve("first", SKU, 6);
 
         assertThat(confirmation.replay()).isFalse();
         assertThat(confirmation.reservation().quantity()).isEqualTo(6);
@@ -32,9 +40,9 @@ class ReservationServiceTest {
 
     @Test
     void replayReturnsTheSameConfirmationWithoutDebitingAgain() {
-        ReservationService.Confirmation first = service.reserve("first", SKU, 6);
+        ReservationConfirmation first = service.reserve("first", SKU, 6);
 
-        ReservationService.Confirmation replay = service.reserve("first", SKU, 6);
+        ReservationConfirmation replay = service.reserve("first", SKU, 6);
 
         assertThat(replay.replay()).isTrue();
         assertThat(replay.reservation()).isEqualTo(first.reservation());
@@ -44,9 +52,9 @@ class ReservationServiceTest {
     @ParameterizedTest
     @CsvSource({"OTHER-1, 6", "DEMO-1, 5"})
     void keyConflictPreservesTheOriginalReservationAndStock(String sku, int quantity) {
-        ReservationService.Reservation original = service.reserve("first", SKU, 6).reservation();
+        Reservation original = service.reserve("first", SKU, 6).reservation();
 
-        ReservationService.Rejected rejection = assertThrows(ReservationService.Rejected.class,
+        ReservationRejected rejection = assertThrows(ReservationRejected.class,
                 () -> service.reserve("first", sku, quantity));
 
         assertThat(rejection.reason()).isEqualTo(KEY_REUSED);
@@ -57,17 +65,24 @@ class ReservationServiceTest {
     @ParameterizedTest
     @CsvSource({"OTHER-1, 1, SKU_NOT_FOUND", "DEMO-1, 11, INSUFFICIENT_STOCK"})
     void rejectedReservationLeavesTheFullStockAndItsKeyAvailable(
-            String sku, int quantity, ReservationService.RejectionReason expected) {
-        ReservationService.Rejected rejection = assertThrows(ReservationService.Rejected.class,
+            String sku, int quantity, ReservationRejected.Reason expected) {
+        ReservationRejected rejection = assertThrows(ReservationRejected.class,
                 () -> service.reserve("retry", sku, quantity));
 
         assertThat(rejection.reason()).isEqualTo(expected);
-        ReservationService.Rejected aboveInitialStock = assertThrows(ReservationService.Rejected.class,
+        ReservationRejected aboveInitialStock = assertThrows(ReservationRejected.class,
                 () -> service.reserve("too-large", SKU, 11));
         assertThat(aboveInitialStock.reason()).isEqualTo(INSUFFICIENT_STOCK);
-        ReservationService.Confirmation confirmation = service.reserve("retry", SKU, 10);
+        ReservationConfirmation confirmation = service.reserve("retry", SKU, 10);
         assertThat(confirmation.replay()).isFalse();
         assertThat(confirmation.reservation().quantity()).isEqualTo(10);
+    }
+
+    @Test
+    void applicationPortRejectsNonPositiveQuantityWithoutChangingStock() {
+        assertThrows(IllegalArgumentException.class, () -> service.reserve("invalid", SKU, -1));
+
+        assertThat(service.reserve("invalid", SKU, 10).reservation().quantity()).isEqualTo(10);
     }
 
     @Test
@@ -93,7 +108,7 @@ class ReservationServiceTest {
     }
 
     private void assertExactlyFourRemain() {
-        ReservationService.Rejected rejection = assertThrows(ReservationService.Rejected.class,
+        ReservationRejected rejection = assertThrows(ReservationRejected.class,
                 () -> service.reserve("five", SKU, 5));
         assertThat(rejection.reason()).isEqualTo(INSUFFICIENT_STOCK);
         assertThat(service.reserve("four", SKU, 4).reservation().quantity()).isEqualTo(4);
@@ -115,12 +130,12 @@ class ReservationServiceTest {
         startTogether.await(5, TimeUnit.SECONDS);
         try {
             return new Attempt(service.reserve(key, SKU, 6), null);
-        } catch (ReservationService.Rejected rejection) {
+        } catch (ReservationRejected rejection) {
             return new Attempt(null, rejection.reason());
         }
     }
 
     private record Attempt(
-            ReservationService.Confirmation confirmation, ReservationService.RejectionReason reason) {
+            ReservationConfirmation confirmation, ReservationRejected.Reason reason) {
     }
 }

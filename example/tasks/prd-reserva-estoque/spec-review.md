@@ -21,4 +21,4 @@ O agente local encontrou Maven no cache de ferramentas e Java 21 instalado, embo
 
 ## Limite do piloto
 
-O piloto observou três lacunas materiais e uma melhoria descobertas antes do código. A comparação A/B com validação local sobre a mesma base e a medição de tokens e tempo total ficam para uma rodada dedicada.
+O piloto observou três lacunas materiais e uma melhoria descobertas antes do código. O perfil hexagonal foi adotado depois, no ADR 0002, a partir da revisão do código. A revisão 3 foi validada localmente com o ADR e ARQ-01. A comparação A/B e a medição de tokens e tempo total ficam para uma rodada dedicada. [Revisão arquitetural](codereview.md)

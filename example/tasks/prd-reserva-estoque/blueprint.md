@@ -2,17 +2,20 @@
 
 - PRD analisado — [revisão 2](prd.md).
 - Atualizado em — 2026-11-20.
-- Base observada na descoberta — kit SDD e repositório sem código Java para este componente. O mapa abaixo descreve a arquitetura proposta para o exemplo.
+- Base na descoberta — repositório sem código Java para este componente. A revisão 2 implementou controller e serviço no mesmo pacote. A revisão 3 adota Ports and Adapters segundo o ADR 0002.
 
 ## Fluxo e fronteiras
 
-O consumidor de pedidos chama a API de reserva pela interface de loopback. O controller valida e traduz o contrato HTTP. O serviço possui o saldo e o registro das chaves confirmadas. A confirmação e o débito precisam ocorrer no mesmo limite de consistência (CA-01 a CA-05). O reinício recria o estado da instância (CA-06).
+O consumidor chama a API em loopback. O adaptador HTTP traduz o contrato e chama a porta de entrada. O caso de uso pede acesso exclusivo ao adaptador de memória pela porta de saída. Durante a operação, o agregado decide débito e replay (CA-01 a CA-05). A configuração Spring cria o estado inicial a cada reinício (CA-06).
 
 ```mermaid
 flowchart LR
-    Cliente["Consumidor de pedidos"] -->|"POST de reserva · proposto"| MVC["Controller MVC"]
-    MVC -->|"SKU, quantidade e chave"| Servico["Serviço de reserva"]
-    Servico -->|"Acesso sincronizado"| Memoria["Saldo e chaves da instância"]
+    Cliente["Consumidor de pedidos"] -->|"POST de reserva"| MVC["Adaptador HTTP"]
+    MVC --> Entrada["Porta ReserveStock"]
+    Entrada --> Caso["Caso de uso"]
+    Caso --> Saida["Porta ReservationStore"]
+    Saida --> Memoria["Adaptador em memória"]
+    Memoria -->|"Operação sob acesso exclusivo"| Dominio["Agregado de saldo e confirmações"]
 ```
 
 ## Matriz de impacto e trade-offs
@@ -28,4 +31,4 @@ Escolha do piloto — estado em memória. O custo aceito é perder os dados no r
 
 ## Decisão arquitetural
 
-[ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md) registra o limite de consistência e a vida útil da idempotência. A [TechSpec](techspec.md) converte a decisão em contrato e verificações.
+[ADR 0001](../../docs/architecture/adr/0001-consistencia-em-memoria.md) registra o limite de consistência e a vida útil da idempotência. O [ADR 0002](../../docs/architecture/adr/0002-ports-and-adapters.md) define a direção das dependências e as responsabilidades. A [TechSpec](techspec.md) vincula as decisões a verificações.

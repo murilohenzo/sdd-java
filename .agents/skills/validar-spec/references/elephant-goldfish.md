@@ -11,6 +11,7 @@ Adaptação do [Elephant-Goldfish Model](https://github.com/google/elephant-gold
 
 - Reconstrua em poucas linhas o comportamento e as restrições que um implementador precisa respeitar.
 - Identifique interpretações plausíveis que levem a resultados diferentes, obrigações sem cobertura e divergências com fontes ou decisões vigentes. Para cada achado, indique ID/trecho, evidência, consequência para a etapa e a pergunta ou correção que o resolve.
+- Quando a funcionalidade adotar um perfil arquitetural, confira se o desenho explica as responsabilidades e a direção das dependências e prevê como verificar as fronteiras.
 - Distinga pendências que impedem a etapa de melhorias opcionais. Sinalize premissas que o texto deixa em aberto. Emita a recomendação de prontidão para o escopo avaliado.
 
 Para avaliar eficiência, compare com a revisão local sobre as mesmas revisões e registre achados válidos, falsos positivos, tempo e tokens de autor, revisor, consolidação e correções quando disponíveis. O [roteiro de avaliação](../../../../docs/sdd-validation.md) define a comparação.

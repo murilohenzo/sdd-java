@@ -14,4 +14,4 @@
 
 ## Execução
 
-TC-01 a TC-04 e TU-01/TU-02 passaram em `mvn -B -ntp verify` com diretório `example/`. MAN-01 passou em duas inicializações sucessivas do JAR. Consulte os [resultados HTTP](qa.md#aceite-verificado) e o [procedimento de reinício](qa.md#man-01--escuta-local-e-reinício).
+Na revisão 2, TC-01 a TC-04 e TU-01/TU-02 passaram em `mvn -B -ntp verify` com diretório `example/`. MAN-01 passou em duas inicializações sucessivas do JAR. A [tarefa 3.0](task_3.md) revalidou o contrato e transferiu o acesso exclusivo ao adaptador em memória. Consulte os [resultados vigentes](qa.md#aceite-verificado).

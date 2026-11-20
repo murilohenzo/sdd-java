@@ -18,7 +18,7 @@ Com **Java 21 e Maven**, execute na raiz do repositório:
 mvn -f example/pom.xml -B -ntp verify
 ```
 
-O módulo implementa `POST /reservations`, com saldo e chaves de idempotência em memória durante a vida do processo. A suíte verifica criação, replay, conflitos, entradas inválidas e concorrência. O QA também registra a verificação de escuta local e reinício com o JAR empacotado. [Inicie a API e teste o replay](example/README.md#execute-a-api) · [Veja as evidências de QA](example/tasks/prd-reserva-estoque/qa.md)
+O módulo implementa `POST /reservations`, com saldo e chaves de idempotência em memória durante a vida do processo. A suíte verifica criação, replay, conflitos, entradas inválidas, concorrência e as fronteiras hexagonais. O QA também registra a escuta local e o reinício com o JAR empacotado. [Inicie a API e teste o replay](example/README.md#execute-a-api) · [Arquitetura do exemplo](example/README.md#arquitetura-hexagonal) · [Evidências de QA](example/tasks/prd-reserva-estoque/qa.md)
 
 Para ler a entrega na ordem em que foi construída, siga o [percurso do exemplo](example/README.md#percorra-o-sdd).
 
@@ -64,7 +64,7 @@ Peça a revisão com o caminho exato. Este é um pedido ao agente:
 
 O modo usa a delegação em contexto novo do ambiente. Se ela estiver indisponível, registre a passagem como `NÃO EXECUTADO` e aplique a checagem local se a etapa permitir. Quando a independência for exigida para liberar a etapa, o veredito fica `BLOQUEADO`. [Procedimento do kit](.agents/skills/validar-spec/references/elephant-goldfish.md) · [Modelo EGM](https://github.com/google/elephant-goldfish-model)
 
-**O que o piloto demonstrou.** O revisor identificou três lacunas materiais e uma ambiguidade no formato da quantidade antes do código. Uma delas era a prova do saldo exato. Confirmar uma reserva final de quatro unidades provava apenas que havia pelo menos quatro. O plano passou a exigir a rejeição de cinco seguida da confirmação de quatro. A implementação passou nos 25 testes e o QA verificou os seis critérios de aceite. Ganhos de tempo, retrabalho e tokens ainda precisam de comparação controlada. [Relatório do piloto](example/tasks/prd-reserva-estoque/spec-review.md) · [Como avaliar](example/README.md#avalie-a-revisão-independente)
+**O que o piloto demonstrou.** O revisor identificou três lacunas materiais e uma ambiguidade no formato da quantidade antes do código. Uma delas era a prova do saldo exato. Confirmar uma reserva final de quatro unidades provava apenas que havia pelo menos quatro. O plano passou a exigir a rejeição de cinco seguida da confirmação de quatro. Ganhos de tempo, retrabalho e tokens ainda precisam de comparação controlada. A revisão posterior do código levou à adoção do perfil hexagonal, hoje verificado no build. [Relatório do piloto](example/tasks/prd-reserva-estoque/spec-review.md) · [Como avaliar](example/README.md#avalie-a-revisão-independente)
 
 ## Adote o kit em outro projeto
 

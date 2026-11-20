@@ -12,4 +12,4 @@
 
 ## Execução
 
-TU-04 e TU-05 passaram em `mvn -B -ntp verify` com diretório `example/`. As duas disputas produziram quatro unidades remanescentes, com os resultados previstos para chaves diferentes e para a mesma chave. [Evidência de QA](qa.md#aceite-verificado)
+Na revisão 2, TU-04 e TU-05 passaram em `mvn -B -ntp verify` com diretório `example/`. A [tarefa 3.0](task_3.md) repetiu as disputas para provar o comportamento do caso de uso com o adaptador em memória. Ambas deixaram quatro unidades remanescentes. [Evidência vigente de QA](qa.md#aceite-verificado)
